@@ -9,10 +9,11 @@ const LoginController = require('./controllers/LoginController');
 const RegistrationController = require('./controllers/RegistrationController');
 const ApprovalController = require('./controllers/ApprovalController');
 const RejectionController = require('./controllers/RejectionController');
+const SourceController = require('./controllers/SourceController');
 const uploadConfig = require('./config/upload');
 
 const routes = express.Router();
-const upload = multer(uploadConfig)
+const upload = multer(uploadConfig);
 
 
 routes.get('/status', (req, res)=>{
@@ -21,15 +22,11 @@ routes.get('/status', (req, res)=>{
 
 //TODO: add todo extension VSCODE
 
-//Registration
-routes.post('/registration/:eventId', verifyToken, RegistrationController.create);
-routes.get('/registration', verifyToken, RegistrationController.getMyRegistrations);
-routes.get('/registration/:registration_id', RegistrationController.getRegistration)
-routes.post('/registration/:registration_id/approvals', verifyToken, ApprovalController.approval);
-routes.post('/registration/:registration_id/rejections', verifyToken, RejectionController.rejection);
-
 //login
 routes.post('/login', LoginController.store);
+//User
+routes.post('/user/register', UserController.createUser);
+routes.get('/user/:userId', UserController.getUserById);
 
 //Dashboard:
 routes.get('/dashboard/:sport', verifyToken, DashboardController.getAllEvents)
@@ -37,13 +34,19 @@ routes.get('/dashboard', verifyToken, DashboardController.getAllEvents)
 routes.get('/user/events', verifyToken, DashboardController.getEventsByUserId)
 routes.get('/event/:eventId',verifyToken, DashboardController.getEventById)
 
+//sources:
+routes.post('/addSource', verifyToken, upload.single("thumbnail"), SourceController.createSource);
+routes.get('/getAllSources', verifyToken, SourceController.getAllSources);
 
 //Events:
 routes.post('/event', verifyToken, upload.single("thumbnail"), EventController.createEvent)
 routes.delete('/event/:eventId', verifyToken, EventController.delete)
 
-//User
-routes.post('/user/register', UserController.createUser);
-routes.get('/user/:userId', UserController.getUserById);
+//Registration
+routes.post('/registration/:eventId', verifyToken, RegistrationController.create);
+routes.get('/registration', verifyToken, RegistrationController.getMyRegistrations);
+routes.get('/registration/:registration_id', RegistrationController.getRegistration)
+routes.post('/registration/:registration_id/approvals', verifyToken, ApprovalController.approval);
+routes.post('/registration/:registration_id/rejections', verifyToken, RejectionController.rejection);
 
 module.exports = routes;

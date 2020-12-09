@@ -4,7 +4,9 @@ const cors =     require('cors');
 const routes =   require('./routes');
 const path =     require('path');
 const http =     require('http');
-const socketio = require('socket.io')
+const socketio = require('socket.io');
+const bodyParser = require('body-parser');
+const engine =   require('./core/engine');
 const Port = process.env.PORT || 8000
 
 
@@ -30,6 +32,11 @@ try {
 // better useing reddis
 const connectUsers = {  };
 
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support  URL-encoded bodies
+  extended: true
+}));
+
 io.on('connection', socket => {
     console.log(socket.handshake.query)
     const { user } = socket.handshake.query;
@@ -50,6 +57,12 @@ app.use(cors());
 app.use(express.json());
 app.use("/files", express.static(path.resolve(__dirname, "..", "files")));
 app.use(routes);
+
+// in production: every ten minutes:
+// setInterval(function(){ // set the timer to trigger automatically
+//     engine.start();
+// }, 10 * 60 * 1000);  // equal 10 minutes
+engine.start();
 
 //app.listen(Port, ()=>{  // it was without socket
 server.listen(Port, ()=>{   // with socket
