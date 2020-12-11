@@ -39,7 +39,6 @@ module.exports = {
             req.on('response', function (res) {
                 var stream = this;
                 if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
-                console.log("good:");
                 //console.log("feedparseBody:", feedparser);
                 stream.pipe(feedparser);
             });
@@ -56,7 +55,7 @@ module.exports = {
                 var item = stream.read();
                 if(item != null){
                     console.log("fileName:", fileName);
-                    console.log("title:", item.title);
+                    // console.log("title:", item.title);
                     // console.log("description:", item.description);
                     // console.log("link:", item.link);
                     // console.log("pubDate:", item.pubDate);
@@ -68,9 +67,8 @@ module.exports = {
                     const res = News.find({ "title" : item.title }, function(err, newsResult) {
                         console.log("filename in find", fileName);
                         if (err) throw err;
-                        //console.log("newsResult:->" + newsResult + "<-");
                         if(newsResult != "" ){
-                            console.log("if tekrari ejra shod:" + newsResult);//recently added didnt test
+                            console.log("if tekrari ejra shod:" ); // + newsResult);//recently added didnt test
                             duplicateNews = true; 
                         }
                         if( !duplicateNews ) { //  dar db nabood//!(db.news.findone({ title: " + item.title + "}))
@@ -90,6 +88,9 @@ module.exports = {
                         if (body){
                             var $ = cheerio.load(body, { decodeEntities: false });
                             var text = "";
+                            console.log("||--", body)
+                            console.log(sourceObj);
+                            console.log("$$$$:", $);
                             $(sourceObj.tagClassName).each(function () {
                                 $('font').removeAttr('size');//for varzesh3
                                 $('font').removeAttr('color');//for varzesh3
@@ -101,7 +102,7 @@ module.exports = {
                                 var newsBody = $(this);
                                 text = newsBody.html(); //with text we get just the text not image not link not enter not style
                                 //var href = newsBody.attr("href");
-                                //console.log(text + " ->|||| ");
+                                console.log(" ->|||| ", text);
                 
                             });
                             if(sourceObj.secondTag){
