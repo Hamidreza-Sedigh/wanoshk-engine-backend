@@ -8,8 +8,8 @@ const NewsSchema = new mongoose.Schema({
     link : String,
     passage : String,
     date : Date,
-    category : String
-    
+    category : String,
+    views: Number
 })
 
 module.exports = mongoose.model('News', NewsSchema)

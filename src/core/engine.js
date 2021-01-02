@@ -3,6 +3,7 @@ const News = require('../models/news');
 const request = require('request');
 var FeedParser = require('feedparser');
 var cheerio = require("cheerio");
+const got = require('got');
 
 //db.resources.find().count() 
 
@@ -53,7 +54,7 @@ module.exports = {
                 //meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
                 fileName++;
                 var item = stream.read();
-                if(item != null){
+                if(item != null && fileName < 3){ // temp 3 fix in production
                     console.log("fileName:", fileName);
                     // console.log("title:", item.title);
                     // console.log("description:", item.description);
@@ -67,10 +68,10 @@ module.exports = {
                     const res = News.find({ "title" : item.title }, function(err, newsResult) {
                         console.log("filename in find", fileName);
                         if (err) throw err;
-                        if(newsResult != "" ){
-                            console.log("if tekrari ejra shod:" ); // + newsResult);//recently added didnt test
-                            duplicateNews = true; 
-                        }
+                        // if(newsResult != "" ){
+                        //     console.log("if tekrari ejra shod:" ); // + newsResult);//recently added didnt test
+                        //     duplicateNews = true; 
+                        // }
                         if( !duplicateNews ) { //  dar db nabood//!(db.news.findone({ title: " + item.title + "}))
                             console.log("tekrari nabood");
                             saveHtml(item.link, item.title, item.description, item.pubDate, sourceObj, fileName);
@@ -82,69 +83,61 @@ module.exports = {
                     console.log("in save HTML:", fileName);
                     console.log("in save HTML:", title);
                     
-                    request({
-                        uri: encodeURI(link),
-                    }, function (error, response, body) {
-                        if (body){
-                            var $ = cheerio.load(body, { decodeEntities: false });
-                            var text = "";
-                            console.log("||--", body)
-                            console.log(sourceObj);
-                            console.log("$$$$:", $);
-                            $(sourceObj.tagClassName).each(function () {
-                                $('font').removeAttr('size');//for varzesh3
-                                $('font').removeAttr('color');//for varzesh3
-                                $('.itemTagsBlock').remove();//for varzesh3
-                                $('.Tags + div + div').remove();// for irna
-                                $('.Tags + div').remove();// for irna
-                                $('.Tags').remove();// for irna
-                                $('script').remove();//for afkarnews
-                                var newsBody = $(this);
-                                text = newsBody.html(); //with text we get just the text not image not link not enter not style
-                                //var href = newsBody.attr("href");
-                                console.log(" ->|||| ", text);
-                
+                    (async () => {
+                        const response = await got(link);
+                        const $ = cheerio.load(response.body, { decodeEntities: false });
+                        var text = "";
+                        $('.body').each(function () {
+                            $('font').removeAttr('size');//for varzesh3
+                            $('font').removeAttr('color');//for varzesh3
+                            $('.itemTagsBlock').remove();//for varzesh3
+                            $('.Tags + div + div').remove();// for irna
+                            $('.Tags + div').remove();// for irna
+                            $('.Tags').remove();// for irna
+                            $('script').remove();//for afkarnews
+                            var newsBody = $(this);
+                            text = newsBody.html();
+                            console.log("|||text:", text);
+                        });
+                        if(sourceObj.secondTag){
+                            console.log("for the " + sourceObj.sourceName + " if second ejra shod");
+                            $(sourceObj.secondTag).each(function () {//baraye mavarede 2 tagi mese vaghti ax jodas
+                                var img = $(this);
+                                text = img.html() +  text; 
                             });
-                            if(sourceObj.secondTag){
-                                console.log("for the " + sourceObj.sourceName + " if second ejra shod");
-                                $(sourceObj.secondTag).each(function () {//baraye mavarede 2 tagi mese vaghti ax jodas
-                                    var img = $(this);
-                                    text = img.html() +  text; 
-                                });
-                            }
-                            
-                            if(sourceObj.isLocalImg){
-                                if(text.includes('src="/')){
-                                    var res = text.split('src="');
-                                    var result = res[0];
-                                    if(res.length > 1){
-                                        for(var k =0; k < res.length-1 ; k++){
-                                            var result = result + siteAddress + res[k+1] ;
-                                        }
-                                        text = result;
+                        }
+                        
+                        if(sourceObj.isLocalImg){
+                            if(text.includes('src="/')){
+                                var res = text.split('src="');
+                                var result = res[0];
+                                if(res.length > 1){
+                                    for(var k =0; k < res.length-1 ; k++){
+                                        var result = result + siteAddress + res[k+1] ;
                                     }
+                                    text = result;
                                 }
                             }
-                              
-                            var outputNewsObj = News({
-                                sourceName : sourceObj.sourceName,
-                                siteAddress : sourceObj.siteAddress,
-                                title : title,
-                                description : description,
-                                link : link,
-                                passage : text,
-                                date : pubDate,
-                                category : sourceObj.isCategorized == 0 ? bayesDecisionMaker(sourceObj.passage) : sourceObj.category
-                            });
-                            outputNewsObj.save(function(err){
-                                if (err) throw err;
-                                console.log("News saved succssfully");
-                            });
-                            
-                        }else{
-                            console.log("an empty body pass to cheerio:" + link);
                         }
-                    });
+                          
+                        var outputNewsObj = News({
+                            sourceName : sourceObj.sourceName,
+                            siteAddress : sourceObj.siteAddress,
+                            title : title,
+                            description : description,
+                            link : link,
+                            passage : text,
+                            date : pubDate,
+                            category : sourceObj.isCategorized == 0 ? "" : sourceObj.category,
+                            //category : sourceObj.isCategorized == 0 ? bayesDecisionMaker(sourceObj.passage) : sourceObj.category
+                            views: 0
+                        });
+                        outputNewsObj.save(function(err){
+                            if (err) throw err;
+                            console.log("News saved succssfully");
+                        });
+                      })();
+
                 }
 
             });

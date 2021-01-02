@@ -18,6 +18,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "feedparser": "^2.2.10",
+    "got": "^11.8.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.21",
     "multer": "^1.4.2",
