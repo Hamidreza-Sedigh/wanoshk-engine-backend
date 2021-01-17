@@ -10,9 +10,9 @@ module.exports = {
                 const { source } = req.params;
                 const query = source ? { source } : {} ;
                 try {
-                    const Sources = await Source.find(query)
-                    if(Sources){
-                        return res.json({authData, Sources})
+                    const sources = await Source.find(query)
+                    if(sources){
+                        return res.json({authData, sources})
                     }    
                 } catch (error) {
                     return res.status(400).json({ message: 'we dont have any sources yet'});

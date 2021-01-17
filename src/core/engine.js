@@ -54,7 +54,7 @@ module.exports = {
                 //meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
                 fileName++;
                 var item = stream.read();
-                if(item != null && fileName < 3){ // temp 3 fix in production
+                if(item != null ){  // && fileName < 3){ // temp 3 fix in production
                     console.log("fileName:", fileName);
                     // console.log("title:", item.title);
                     // console.log("description:", item.description);
@@ -68,10 +68,10 @@ module.exports = {
                     const res = News.find({ "title" : item.title }, function(err, newsResult) {
                         console.log("filename in find", fileName);
                         if (err) throw err;
-                        // if(newsResult != "" ){
-                        //     console.log("if tekrari ejra shod:" ); // + newsResult);//recently added didnt test
-                        //     duplicateNews = true; 
-                        // }
+                        if(newsResult != "" ){
+                            console.log("if tekrari ejra shod:" ); // + newsResult);//recently added didnt test
+                            duplicateNews = true; 
+                        }
                         if( !duplicateNews ) { //  dar db nabood//!(db.news.findone({ title: " + item.title + "}))
                             console.log("tekrari nabood");
                             saveHtml(item.link, item.title, item.description, item.pubDate, sourceObj, fileName);
@@ -128,7 +128,9 @@ module.exports = {
                             link : link,
                             passage : text,
                             date : pubDate,
-                            category : sourceObj.isCategorized == 0 ? "" : sourceObj.category,
+                            //category : sourceObj.isCategorized == 0 ? "" : sourceObj.category,
+                            // temp:
+                            category : "فناوری",
                             //category : sourceObj.isCategorized == 0 ? bayesDecisionMaker(sourceObj.passage) : sourceObj.category
                             views: 0
                         });
