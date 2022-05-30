@@ -1,15 +1,18 @@
-const Source = require('../models/Source');
-const News = require('../models/news');
-const request = require('request');
+const Source =   require('../models/Source');
+const News =     require('../models/News');
+const request =  require('request');
 var FeedParser = require('feedparser');
-var cheerio = require("cheerio");
-const got = require('got');
+var cheerio =    require("cheerio");
+const got =      require('got');
+const setTime =  require('./setTime');
 
 //db.resources.find().count() 
 
 module.exports = {    
     //start(req,res){
     async start(){
+        console.log("engine runs!");
+        setTime.setFetchTime();
         console.log("runs in engine");
         // const sources = await Source.find({});
         const sources = await Source.find({});
@@ -25,12 +28,15 @@ module.exports = {
         // }
 
         sources.map(s => {
+            console.log("START OF MAP!");
             getFeeds(s);
         });
 
         
         function getFeeds(sourceObj){
-            console.log("testiiiing....");
+            console.log("testiiiing....", sourceObj.rssURL);
+            console.log("testiiiing....", sourceObj.category);
+
             var req = request(sourceObj.rssURL);
             var feedparser = new FeedParser({ addmeta: false });
 
@@ -55,7 +61,7 @@ module.exports = {
                 fileName++;
                 var item = stream.read();
                 if(item != null ){  // && fileName < 3){ // temp 3 fix in production
-                    console.log("fileName:", fileName);
+                    //console.log("fileName:", fileName);
                     // console.log("title:", item.title);
                     // console.log("description:", item.description);
                     // console.log("link:", item.link);
@@ -66,22 +72,22 @@ module.exports = {
 
                     var duplicateNews = false;
                     const res = News.find({ "title" : item.title }, function(err, newsResult) {
-                        console.log("filename in find", fileName);
+                        //console.log("filename in find", fileName);
                         if (err) throw err;
                         if(newsResult != "" ){
-                            console.log("if tekrari ejra shod:" ); // + newsResult);//recently added didnt test
+                            console.log("if tekrari ejra shod:", sourceObj.category ); // + newsResult);//recently added didnt test
                             duplicateNews = true; 
                         }
                         if( !duplicateNews ) { //  dar db nabood//!(db.news.findone({ title: " + item.title + "}))
-                            console.log("tekrari nabood");
+                            //console.log("tekrari nabood");
                             saveHtml(item.link, item.title, item.description, item.pubDate, sourceObj, fileName);
                         }
                     });
                 }
 
                 function saveHtml (link, title, description, pubDate, sourceObj, fileName) {
-                    console.log("in save HTML:", fileName);
-                    console.log("in save HTML:", title);
+                    //console.log("in save HTML:", fileName);
+                    //console.log("in save HTML:", title);
                     
                     (async () => {
                         const response = await got(link);
@@ -97,7 +103,7 @@ module.exports = {
                             $('script').remove();//for afkarnews
                             var newsBody = $(this);
                             text = newsBody.html();
-                            console.log("|||text:", text);
+                            //console.log("|||text:", text);
                         });
                         if(sourceObj.secondTag){
                             console.log("for the " + sourceObj.sourceName + " if second ejra shod");
@@ -130,13 +136,13 @@ module.exports = {
                             date : pubDate,
                             //category : sourceObj.isCategorized == 0 ? "" : sourceObj.category,
                             // temp:
-                            category : "فناوری",
+                            category : sourceObj.category,
                             //category : sourceObj.isCategorized == 0 ? bayesDecisionMaker(sourceObj.passage) : sourceObj.category
                             views: 0
                         });
                         outputNewsObj.save(function(err){
                             if (err) throw err;
-                            console.log("News saved succssfully");
+                            console.log("News saved succssfully", sourceObj.category);
                         });
                       })();
 

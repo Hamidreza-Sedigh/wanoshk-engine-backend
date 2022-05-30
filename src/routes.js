@@ -11,6 +11,7 @@ const ApprovalController = require('./controllers/ApprovalController');
 const RejectionController = require('./controllers/RejectionController');
 const SourceController = require('./controllers/SourceController');
 const uploadConfig = require('./config/upload');
+const ContactUsController = require('./controllers/ContactUsController');
 
 const routes = express.Router();
 const upload = multer(uploadConfig);
@@ -37,6 +38,13 @@ routes.get('/event/:eventId',verifyToken, DashboardController.getEventById)
 //sources:
 routes.post('/addSource', verifyToken, upload.single("thumbnail"), SourceController.createSource);
 routes.get('/getAllSources', verifyToken, SourceController.getAllSources);
+
+//infos:
+routes.get('/getLastTime',  verifyToken, DashboardController.getLastTime);
+routes.get('/getNewsCount', verifyToken, DashboardController.getNewsCounts);
+
+//contacts:getAllSources getContacts
+routes.get('/getContacts', verifyToken, ContactUsController.getContacts);
 
 //Events:
 routes.post('/event', verifyToken, upload.single("thumbnail"), EventController.createEvent)

@@ -14,6 +14,8 @@ const app =      express();
 const server = http.Server(app);
 const io = socketio(server); 
 
+console.log("test1");
+
 if(process.env.NODE_ENV !== 'production' ){
     require('dotenv').config()
 }
@@ -59,10 +61,11 @@ app.use("/files", express.static(path.resolve(__dirname, "..", "files")));
 app.use(routes);
 
 // in production: every ten minutes:
-// setInterval(function(){ // set the timer to trigger automatically
-//     engine.start();
-// }, 10 * 60 * 1000);  // equal 10 minutes
 engine.start();
+setInterval(function(){ // set the timer to trigger automatically
+    engine.start();
+}, 10 * 60 * 1000);  // equal 10 minutes
+// engine.start();
 
 //app.listen(Port, ()=>{  // it was without socket
 server.listen(Port, ()=>{   // with socket

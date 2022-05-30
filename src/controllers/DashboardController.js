@@ -1,5 +1,8 @@
 const Event = require('../models/Event');
+const Timeinfo = require('../models/Timeinfo');
 const jwt =      require('jsonwebtoken');
+const News = require('../models/News');
+
 
 module.exports = {
     getEventById(req,res){
@@ -63,6 +66,41 @@ module.exports = {
                 }
             }
             
+        });
+    },
+
+    getLastTime(req, res){
+        jwt.verify(req.token, 'secret', async(err, authData) => {
+            if (err) {
+                console.log("ERROR in getLastTime jwt");
+            } else {
+                try {
+                    const lastTime = await Timeinfo.find({}).sort({ lastTimeFetch: -1 }).limit(1);
+                    if(lastTime){
+                        return res.json({authData, lastTime})
+                    }    
+                } catch (error) {
+                    return res.status(400).json({ message: `we dont have any time yet`});
+                }
+            }
+        });
+    },
+
+    getNewsCounts(req, res){
+        jwt.verify(req.token, 'secret', async(err, authData) => {
+            if (err) {
+                console.log("ERROR in getLastTime jwt");
+            } else {
+                try {
+                    // const newsCount = await News.find({}).count()
+                    const newsCount = await News.find({}).countDocuments()
+                    if(newsCount){
+                        return res.json({authData, newsCount})
+                    }    
+                } catch (error) {
+                    return res.status(400).json({ message: `we dont have any news yet`});
+                }
+            }
         });
     }
 }
