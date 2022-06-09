@@ -36,6 +36,7 @@ routes.get('/user/events', verifyToken, DashboardController.getEventsByUserId)
 routes.get('/event/:eventId',verifyToken, DashboardController.getEventById)
 
 //sources:
+console.log("test in routes.");
 routes.post('/addSource', verifyToken, upload.single("thumbnail"), SourceController.createSource);
 routes.get('/getAllSources', verifyToken, SourceController.getAllSources);
 

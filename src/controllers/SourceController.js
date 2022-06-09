@@ -10,7 +10,9 @@ module.exports = {
                 const { source } = req.params;
                 const query = source ? { source } : {} ;
                 try {
-                    const sources = await Source.find(query)
+                    //const sources = await Source.find(query).sort({ "sourceName": 1 })
+                    //const sources = await Source.find(query)
+                    const sources = await Source.find(query).sort({"sourceName": -1}).exec()
                     if(sources){
                         return res.json({authData, sources})
                     }    
