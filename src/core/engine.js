@@ -75,10 +75,10 @@ module.exports = {
                         //console.log("filename in find", fileName);
                         if (err) throw err;
                         if(newsResult != "" ){
-                            console.log("if tekrari ejra shod:", sourceObj.category ); // + newsResult);//recently added didnt test
+                            console.log("duplicate:", sourceObj.sourceName ); // + newsResult);//recently added didnt test
                             duplicateNews = true; 
                         }
-                        if( !duplicateNews ) { //  dar db nabood//!(db.news.findone({ title: " + item.title + "}))
+                        if( !duplicateNews ) { 
                             //console.log("tekrari nabood");
                             saveHtml(item.link, item.title, item.description, item.pubDate, sourceObj, fileName);
                         }
@@ -102,6 +102,16 @@ module.exports = {
                             $('.Tags').remove();// for irna
                             $('script').remove();//for afkarnews
                             var newsBody = $(this);
+                            var imageIndex = 0
+                            $("img").each(function() {
+                                if( sourceObj.sourceName == 'عصر ایران' ){
+                                    var old_src=newsBody.attr("src");
+                                    var new_src = newsBody.find('img').eq(imageIndex).attr('data-src');
+                                    //console.log(new_src);
+                                    $(this).attr("src", new_src);
+                                    if( $(this).attr('class') == "lazyload"   ) {imageIndex++; console.log("+++",imageIndex)}
+                                }
+                            });
                             text = newsBody.html();
                             //console.log("|||text:", text);
                         });
@@ -142,7 +152,7 @@ module.exports = {
                         });
                         outputNewsObj.save(function(err){
                             if (err) throw err;
-                            console.log("News saved succssfully", sourceObj.category);
+                            console.log("News saved succssfully", sourceObj.sourceName);
                         });
                       })();
 
