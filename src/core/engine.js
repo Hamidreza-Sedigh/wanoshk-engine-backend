@@ -17,7 +17,7 @@ module.exports = {
         // const sources = await Source.find({});
         const sources = await Source.find({});
         var rssNumbers = 1 ; // <-temp | later -> sources.length /or/ db.sources.find().count()
-        var rssNumbers =  sources.length ;
+        rssNumbers =  sources.length ;
         console.log("rss Counts:", rssNumbers);
 
         // for(var i = 0; i < rssNumbers; i++) {
@@ -93,7 +93,9 @@ module.exports = {
                         const response = await got(link);
                         const $ = cheerio.load(response.body, { decodeEntities: false });
                         var text = "";
-                        $('.body').each(function () {
+                        //$('.body').each(function () {
+                        console.log('TAG:',sourceObj.tagClassName," for site : ", sourceObj.sourceName);
+                        $(sourceObj.tagClassName).each(function () {
                             $('font').removeAttr('size');//for varzesh3
                             $('font').removeAttr('color');//for varzesh3
                             $('.itemTagsBlock').remove();//for varzesh3
@@ -127,9 +129,10 @@ module.exports = {
                             if(text.includes('src="/')){
                                 var res = text.split('src="');
                                 var result = res[0];
+                                console.log("isLoc Result:", result);
                                 if(res.length > 1){
                                     for(var k =0; k < res.length-1 ; k++){
-                                        var result = result + siteAddress + res[k+1] ;
+                                        var result = result + sourceObj.siteAddress + res[k+1] ;
                                     }
                                     text = result;
                                 }
