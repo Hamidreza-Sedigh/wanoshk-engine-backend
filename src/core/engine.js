@@ -29,6 +29,8 @@ module.exports = {
 
         sources.map(s => {
             console.log("START OF MAP!");
+            s.lastTimeFetch = new Date();
+            s.save();
             getFeeds(s);
         });
 

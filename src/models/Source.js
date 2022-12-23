@@ -9,7 +9,8 @@ const SourceSchema = new mongoose.Schema({
     secondTag : String,
     isLocalImg : Boolean,
     isCategorized : Boolean,
-    category : String
+    category : String,
+    lastTimeFetch: Date
 })
 
 module.exports = mongoose.model('Source', SourceSchema)
