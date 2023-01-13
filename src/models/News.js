@@ -8,7 +8,11 @@ const NewsSchema = new mongoose.Schema({
     link : String,
     passage : String,
     date : Date,
+    fetchDate : Date,
     category : String,
+    categoryEn: String,
+    subCategory : String,
+    subCategoryEn : String,
     views: Number
 })
 

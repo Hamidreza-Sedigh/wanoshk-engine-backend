@@ -15,29 +15,32 @@ module.exports = {
         setTime.setFetchTime();
         console.log("runs in engine");
         // const sources = await Source.find({});
-        const sources = await Source.find({});
-        var rssNumbers = 1 ; // <-temp | later -> sources.length /or/ db.sources.find().count()
+        console.log("----TEST in engine:before DB query:");
+        const sources = await Source.findOne({}).sort({lastTimeFetch: 1}).exec();
+        console.log("----TEST in engine:sources:", sources);
+        var rssNumbers = 1 ; // 
+        //rssNumbers = db.sources.find().count()
         rssNumbers =  sources.length ;
         console.log("rss Counts:", rssNumbers);
 
-        // for(var i = 0; i < rssNumbers; i++) {
-        //     console.log(srcResult[i]);
-        //     console.log("in the main: ***************************************************")
-        //     getFeeds(srcResult[i]);
-        //     console.log("iteration: " + i);//just for test
-        // }
+        // sources.map(s => {
+        //     console.log("START OF MAP!");
+        //     s.lastTimeFetch = new Date();
+        //     s.save();
+        //     getFeeds(s);
+        // });
 
-        sources.map(s => {
-            console.log("START OF MAP!");
-            s.lastTimeFetch = new Date();
-            s.save();
-            getFeeds(s);
-        });
+        console.log("START without!");
+        sources.lastTimeFetch = new Date();
+        sources.save();
+        getFeeds(sources);
+    
 
         
         function getFeeds(sourceObj){
-            console.log("testiiiing....", sourceObj.rssURL);
-            console.log("testiiiing....", sourceObj.category);
+            console.log("source URL", sourceObj.rssURL);
+            console.log("source category:", sourceObj.category);
+            console.log("source categoryEn:", sourceObj.categoryEn);
 
             var req = request(sourceObj.rssURL);
             var feedparser = new FeedParser({ addmeta: false });
