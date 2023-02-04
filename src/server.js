@@ -60,12 +60,20 @@ app.use(express.json());
 app.use("/files", express.static(path.resolve(__dirname, "..", "files")));
 app.use(routes);
 
-// in production: every ten minutes:
-engine.start();
-setInterval(function(){ // set the timer to trigger automatically
+
+//const engineStatusDB = find from db
+//const engineStatusFile = fetch from file
+//if(engineStatusDB && engineStatusFile)
+const tempSatus = false
+if(tempSatus)
     engine.start();
-}, 20 * 60 * 1000);  // equal 10 minutes
-// engine.start();
+setInterval(function(){
+    // engineStatusDB = find from db
+    // engineStatusFile = fetch from file
+    if(tempSatus)
+        engine.start();
+}, 2 * 60 * 1000); 
+
 
 //app.listen(Port, ()=>{  // it was without socket
 server.listen(Port, ()=>{   // with socket

@@ -31,19 +31,31 @@ module.exports = {
             } else {
                 try {
                     console.log("||try createSource:", req.body);
-                    const {sourceName, siteAddress, rssURL, tagClassName, secondTag, isLocalImg, isCategorized, category} = req.body;
+                    const {sourceName, sourceNameEn, siteAddress, rssURL, tagClassName, 
+                        secondTag, isLocalImg, 
+                        isCategorized, category, categoryEn,
+                        isSubCategorized, subCategory, subCategoryEn
+                    } = req.body;
                     const existenSource = await Source.findOne({rssURL});
                     console.log("existenSource:", existenSource);
                     if(!existenSource){
                         const addSource = await Source.create({
                             sourceName,
+                            sourceNameEn,
                             siteAddress,
                             rssURL,
                             tagClassName,
                             secondTag,
                             isLocalImg,
                             isCategorized,
-                            category
+                            category,
+                            categoryEn,
+                            isSubCategorized, 
+                            subCategory, 
+                            subCategoryEn,
+                            status: 'A',
+                            enable: true
+                            
                         });
                         console.log("DONE! sourceAdded");
                         return res.json(addSource);
@@ -53,7 +65,7 @@ module.exports = {
                         });
                     }
                 } catch (error) {
-                    throw Error('Error while registering new user: ${error}')
+                    throw Error(`Error while adding new Source: ${error}`)
                 }    
             }
             

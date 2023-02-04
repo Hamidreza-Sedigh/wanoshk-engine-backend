@@ -12,6 +12,7 @@ const SourceSchema = new mongoose.Schema({
     isCategorized : Boolean,
     category : String,
     categoryEn: String,
+    isSubCategorized : Boolean,
     subCategory : String,
     subCategoryEn : String,
     lastTimeFetch: Date,
