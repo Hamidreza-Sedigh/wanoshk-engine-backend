@@ -46,7 +46,7 @@ module.exports = {
             var feedparser = new FeedParser({ addmeta: false });
 
             req.on('error', function (error) {
-                console.log("request Error:" + error);
+                console.log("handled request Error:" + error);
             });
             req.on('response', function (res) {
                 var stream = this;
@@ -56,7 +56,7 @@ module.exports = {
             });
 
             feedparser.on('error', function (error) {
-                console.log("feedparser Error:"+ error);
+                console.log("handled feedparser Error:"+ error);
             });
 
             var fileName = 0;
@@ -80,7 +80,7 @@ module.exports = {
                         //console.log("filename in find", fileName);
                         if (err) throw err;
                         if(newsResult != "" ){
-                            console.log("duplicate:", sourceObj.sourceName ); // + newsResult);//recently added didnt test
+                            console.log("duplicate:", sourceObj.sourceName,sourceObj.sourceNameEn ); // + newsResult);//recently added didnt test
                             duplicateNews = true; 
                         }
                         if( !duplicateNews ) { 
@@ -95,7 +95,8 @@ module.exports = {
                     //console.log("in save HTML:", title);
                     
                     (async () => {
-                        const response = await got(link);
+                        try {
+                            const response = await got(link);
                         const $ = cheerio.load(response.body, { decodeEntities: false });
                         var text = "";
                         //$('.body').each(function () {
@@ -161,7 +162,13 @@ module.exports = {
                         outputNewsObj.save(function(err){
                             if (err) throw err;
                             console.log("News saved succssfully", sourceObj.sourceName);
-                        });
+                        });    
+                        } catch (error) {
+                            console.log("got Error catched.");
+                            console.log("error:",error);
+                            console.log("error.respond", error.response); 
+                        }
+                        
                       })();
 
                 }
