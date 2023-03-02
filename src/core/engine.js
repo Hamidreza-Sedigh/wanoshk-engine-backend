@@ -117,7 +117,10 @@ module.exports = {
                                     var new_src = newsBody.find('img').eq(imageIndex).attr('data-src');
                                     //console.log(new_src);
                                     $(this).attr("src", new_src);
-                                    if( $(this).attr('class') == "lazyload"   ) {imageIndex++; console.log("+++",imageIndex)}
+                                    if( $(this).attr('class') == "lazyload"   ) {
+                                        imageIndex++; 
+                                    //    console.log("+++",imageIndex)
+                                    }
                                 }
                             });
                             text = newsBody.html();
