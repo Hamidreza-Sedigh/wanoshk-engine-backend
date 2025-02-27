@@ -20,6 +20,10 @@ module.exports = {
         console.log("----TEST in engine:sources:", sources);
         var rssNumbers = 1 ; // 
         //rssNumbers = db.sources.find().count()
+        if (sources == null ){
+            console.log("Not any source in DB");
+            return;
+        } 
         rssNumbers =  sources.length ;
         console.log("rss Counts:", rssNumbers);
 

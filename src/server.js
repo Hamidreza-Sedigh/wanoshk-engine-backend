@@ -21,7 +21,8 @@ if(process.env.NODE_ENV !== 'production' ){
 }
 
 try {
-    mongoose.connect(process.env.MONGO_DB_CONNECTION, {
+    //mongoose.connect(process.env.MONGO_DB_CONNECTION, { // with atlas
+    mongoose.connect("mongodb://localhost:27017/kahrobaDB", {
         useNewUrlParser: true,
         useUnifiedTopology: true
     })
@@ -64,7 +65,7 @@ app.use(routes);
 //const engineStatusDB = find from db
 //const engineStatusFile = fetch from file
 //if(engineStatusDB && engineStatusFile)
-const tempSatus = true
+const tempSatus = false
 if(tempSatus)
     engine.start();
 setInterval(function(){
