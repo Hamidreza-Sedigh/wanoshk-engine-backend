@@ -1,187 +1,129 @@
-const Source =   require('../models/Source');
-const News =     require('../models/News');
-const request =  require('request');
-var FeedParser = require('feedparser');
-var cheerio =    require("cheerio");
-const got =      require('got');
-const setTime =  require('./setTime');
+const RSSParser = require('rss-parser');
+const got = require('got');
+const cheerio = require('cheerio');
+const Source = require('../models/Source');
+const News = require('../models/News');
 
-//db.resources.find().count() 
+const parser = new RSSParser();
 
-module.exports = {    
-    //start(req,res){
-    async start(){
-        console.log("engine runs!");
-        setTime.setFetchTime();
-        console.log("runs in engine");
-        // const sources = await Source.find({});
-        console.log("----TEST in engine:before DB query:");
-        const sources = await Source.findOne({}).sort({lastTimeFetch: 1}).exec();
-        console.log("----TEST in engine:sources:", sources);
-        var rssNumbers = 1 ; // 
-        //rssNumbers = db.sources.find().count()
-        if (sources == null ){
-            console.log("Not any source in DB");
-            return;
-        } 
-        rssNumbers =  sources.length ;
-        console.log("rss Counts:", rssNumbers);
+async function fetchRSSFeed(rssURL) {
+  try {
+    const feed = await parser.parseURL(rssURL);
+    return feed.items;
+  } catch (error) {
+    console.error(`❌ Error fetching RSS feed ${rssURL}:`, error.message);
+    return [];
+  }
+}
 
-        // sources.map(s => {
-        //     console.log("START OF MAP!");
-        //     s.lastTimeFetch = new Date();
-        //     s.save();
-        //     getFeeds(s);
-        // });
+async function fetchArticleContent(url, tagClassName, secondTag) {
+  try {
+    const response = await got(url);
+    const $ = cheerio.load(response.body, { decodeEntities: false });
 
-        console.log("START without!");
-        sources.lastTimeFetch = new Date();
-        sources.save();
-        getFeeds(sources);
-    
+    let content = '';
 
-        
-        function getFeeds(sourceObj){
-            console.log("source URL", sourceObj.rssURL);
-            console.log("source category:", sourceObj.category);
-            console.log("source categoryEn:", sourceObj.categoryEn);
-
-            var req = request(sourceObj.rssURL);
-            var feedparser = new FeedParser({ addmeta: false });
-
-            req.on('error', function (error) {
-                console.log("handled request Error:" + error);
-            });
-            req.on('response', function (res) {
-                var stream = this;
-                if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
-                //console.log("feedparseBody:", feedparser);
-                stream.pipe(feedparser);
-            });
-
-            feedparser.on('error', function (error) {
-                console.log("handled feedparser Error:"+ error);
-            });
-
-            var fileName = 0;
-            feedparser.on('readable', function () {
-                var stream = this;
-                //meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
-                fileName++;
-                var item = stream.read();
-                if(item != null ){  // && fileName < 3){ // temp 3 fix in production
-                    //console.log("fileName:", fileName);
-                    // console.log("title:", item.title);
-                    // console.log("description:", item.description);
-                    // console.log("link:", item.link);
-                    // console.log("pubDate:", item.pubDate);
-                    // var singleNews = News({ //what the fuck is this
-                    //     title : item.title,
-                    // });
-
-                    var duplicateNews = false;
-                    const res = News.find({ "title" : item.title }, function(err, newsResult) {
-                        //console.log("filename in find", fileName);
-                        if (err) throw err;
-                        if(newsResult != "" ){
-                            console.log("duplicate:", sourceObj.sourceName,sourceObj.sourceNameEn ); // + newsResult);//recently added didnt test
-                            duplicateNews = true; 
-                        }
-                        if( !duplicateNews ) { 
-                            //console.log("tekrari nabood");
-                            saveHtml(item.link, item.title, item.description, item.pubDate, sourceObj, fileName);
-                        }
-                    });
-                }
-
-                function saveHtml (link, title, description, pubDate, sourceObj, fileName) {
-                    //console.log("in save HTML:", fileName);
-                    //console.log("in save HTML:", title);
-                    
-                    (async () => {
-                        try {
-                            const response = await got(link);
-                        const $ = cheerio.load(response.body, { decodeEntities: false });
-                        var text = "";
-                        //$('.body').each(function () {
-                        console.log('TAG:',sourceObj.tagClassName," for site : ", sourceObj.sourceName);
-                        $(sourceObj.tagClassName).each(function () {
-                            $('font').removeAttr('size');//for varzesh3
-                            $('font').removeAttr('color');//for varzesh3
-                            $('.itemTagsBlock').remove();//for varzesh3
-                            $('.Tags + div + div').remove();// for irna
-                            $('.Tags + div').remove();// for irna
-                            $('.Tags').remove();// for irna
-                            $('script').remove();//for afkarnews
-                            var newsBody = $(this);
-                            var imageIndex = 0
-                            $("img").each(function() {
-                                if( sourceObj.sourceName == 'عصر ایران' ){
-                                    var old_src=newsBody.attr("src");
-                                    var new_src = newsBody.find('img').eq(imageIndex).attr('data-src');
-                                    //console.log(new_src);
-                                    $(this).attr("src", new_src);
-                                    if( $(this).attr('class') == "lazyload"   ) {
-                                        imageIndex++; 
-                                    //    console.log("+++",imageIndex)
-                                    }
-                                }
-                            });
-                            text = newsBody.html();
-                            //console.log("|||text:", text);
-                        });
-                        if(sourceObj.secondTag){
-                            console.log("for the " + sourceObj.sourceName + " if second ejra shod");
-                            $(sourceObj.secondTag).each(function () {//baraye mavarede 2 tagi mese vaghti ax jodas
-                                var img = $(this);
-                                text = img.html() +  text; 
-                            });
-                        }
-                        
-                        if(sourceObj.isLocalImg){
-                            if(text.includes('src="/')){
-                                var res = text.split('src="');
-                                var result = res[0];
-                                console.log("isLoc Result:", result);
-                                if(res.length > 1){
-                                    for(var k =0; k < res.length-1 ; k++){
-                                        var result = result + sourceObj.siteAddress + res[k+1] ;
-                                    }
-                                    text = result;
-                                }
-                            }
-                        }
-                          
-                        var outputNewsObj = News({
-                            sourceName : sourceObj.sourceName,
-                            siteAddress : sourceObj.siteAddress,
-                            title : title,
-                            description : description,
-                            link : link,
-                            passage : text,
-                            date : pubDate,
-                            //category : sourceObj.isCategorized == 0 ? "" : sourceObj.category,
-                            // temp:
-                            category : sourceObj.category,
-                            //category : sourceObj.isCategorized == 0 ? bayesDecisionMaker(sourceObj.passage) : sourceObj.category
-                            views: 0
-                        });
-                        outputNewsObj.save(function(err){
-                            if (err) throw err;
-                            console.log("News saved succssfully", sourceObj.sourceName);
-                        });    
-                        } catch (error) {
-                            console.log("got Error catched.");
-                            console.log("error:",error);
-                            console.log("error.respond", error.response); 
-                        }
-                        
-                      })();
-
-                }
-
-            });
-        }
+    if (tagClassName) {
+      // اگر secondTag مشخص شده باشه، مثلا div.body > p
+      if (secondTag) {
+        content = $(`${tagClassName} ${secondTag}`).text().trim();
+      } else {
+        content = $(tagClassName).text().trim();
+      }
+    } else {
+      // اگر tagClassName نداشتیم کل body
+      content = $('body').text().trim();
     }
 
+    return content;
+  } catch (error) {
+    console.error(`❌ Error fetching article ${url}:`, error.message);
+    return null;
+  }
 }
+
+async function saveNewsItem(newsData) {
+  try {
+    // بررسی وجود لینک مشابه برای جلوگیری از تکرار
+    const exists = await News.findOne({ link: newsData.link });
+    if (exists) {
+      console.log(`⚠️ News already exists: ${newsData.link}`);
+      return null;
+    }
+
+    const news = new News(newsData);
+    await news.save();
+    console.log(`✅ News saved: ${news.title}`);
+    return news;
+  } catch (error) {
+    console.error(`❌ Error saving news ${newsData.link}:`, error.message);
+    return null;
+  }
+}
+
+// تابع اصلی که RSS و لینک‌ها رو می‌گیرد و پردازش می‌کند
+async function processSource(source) {
+  console.log(`\n📡 Processing source: ${source.sourceName}`);
+
+  const items = await fetchRSSFeed(source.rssURL);
+  if (!items.length) {
+    console.log(`⚠️ No items found in RSS: ${source.rssURL}`);
+    return;
+  }
+
+  for (const item of items) {
+    const content = await fetchArticleContent(item.link, source.tagClassName, source.secondTag);
+    if (!content) {
+      console.log(`⚠️ No content found for: ${item.link}`);
+      continue;
+    }
+
+    const newsData = {
+      sourceName: source.sourceName,
+      siteAddress: source.siteAddress,
+      title: item.title || '',
+      description: item.contentSnippet || '',
+      link: item.link,
+      passage: content,
+      date: item.pubDate ? new Date(item.pubDate) : null,
+      fetchDate: new Date(),
+      category: source.isCategorized ? source.category : '',
+      categoryEn: source.isCategorized ? source.categoryEn : '',
+      subCategory: source.isSubCategorized ? source.subCategory : '',
+      subCategoryEn: source.isSubCategorized ? source.subCategoryEn : '',
+      views: 0,
+    };
+
+    await saveNewsItem(newsData);
+  }
+
+  // به‌روزرسانی تاریخ آخرین بارگذاری منبع
+  try {
+    source.lastTimeFetch = new Date();
+    await source.save();
+    console.log(`🕒 Updated lastTimeFetch for source: ${source.sourceName}`);
+  } catch (error) {
+    console.error(`❌ Error updating lastTimeFetch for source ${source.sourceName}:`, error.message);
+  }
+}
+
+async function start() {
+  console.log('🚀 Engine started.');
+
+  try {
+    const sources = await Source.find({ enable: true });
+    console.log(`🔍 Found ${sources.length} enabled sources.`);
+
+    for (const source of sources) {
+      await processSource(source);
+    }
+
+    console.log('🏁 Engine finished all sources.');
+  } catch (error) {
+    console.error('❌ Engine error:', error.message);
+  }
+}
+
+module.exports = {
+  start,
+};

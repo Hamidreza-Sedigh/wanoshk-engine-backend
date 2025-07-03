@@ -65,7 +65,7 @@ app.use(routes);
 //const engineStatusDB = find from db
 //const engineStatusFile = fetch from file
 //if(engineStatusDB && engineStatusFile)
-const tempSatus = false
+const tempSatus = true
 if(tempSatus)
     engine.start();
 setInterval(function(){
@@ -73,7 +73,7 @@ setInterval(function(){
     // engineStatusFile = fetch from file
     if(tempSatus)
         engine.start();
-}, 2 * 60 * 1000); 
+}, 2 * 60 * 1000); //2min
 
 
 //app.listen(Port, ()=>{  // it was without socket
