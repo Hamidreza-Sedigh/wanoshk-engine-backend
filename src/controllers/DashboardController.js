@@ -87,7 +87,9 @@ module.exports = {
     },
 
     getNewsCounts(req, res){
+        console.log("getNewsCounts started..");
         jwt.verify(req.token, 'secret', async(err, authData) => {
+            console.log("getNewsCounts jwt verified");
             if (err) {
                 console.log("ERROR in getLastTime jwt");
             } else {
