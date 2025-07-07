@@ -101,7 +101,7 @@ module.exports = {
                     (async () => {
                         try {
                             const response = await got(link);
-                        const $ = cheerio.load(response.body, { decodeEntities: false });
+                            const $ = cheerio.load(response.body, { decodeEntities: false });
                         var text = "";
                         //$('.body').each(function () {
                         console.log('TAG:',sourceObj.tagClassName," for site : ", sourceObj.sourceName);

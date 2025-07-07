@@ -30,6 +30,7 @@ async function saveNewsItem(newsData) {
     const news = new News(newsData);
     await news.save();
     console.log(`✅ News saved: ${news.title}`);
+    console.log(news._id);
     return news;
   } catch (error) {
     console.error(`❌ Error saving news ${newsData.link}:`, error.message);

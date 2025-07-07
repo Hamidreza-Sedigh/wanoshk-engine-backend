@@ -22,6 +22,9 @@ routes.get('/status', (req, res)=>{
 });
 
 //TODO: add todo extension VSCODE
+//new ones:
+routes.get('/api/news/:newsId', DashboardController.getNewsById);
+
 
 //login
 routes.post('/login', LoginController.store);

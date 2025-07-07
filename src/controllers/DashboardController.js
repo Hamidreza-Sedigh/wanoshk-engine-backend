@@ -104,5 +104,20 @@ module.exports = {
                 }
             }
         });
+    },
+
+    async getNewsById(req, res){
+        const {newsId} = req.params;  // jean
+        console.log("req:::", req.params);
+        try {
+            const news = await News.findById(newsId);
+            console.log("news:", news);
+            return res.json(news)
+        } catch (error) {
+            return res.status(400).json({
+                message: "news Id does not exist! Do you want to register"
+            });
+            
+        }
     }
 }
