@@ -21,11 +21,13 @@ const News = require('../models/News');
  */
 async function saveNewsItem(newsData) {
   try {
-    const exists = await News.findOne({ link: newsData.link });
-    if (exists) {
-      console.log(`⚠️ News already exists: ${newsData.link}`);
-      return null;
-    }
+    //TODO
+    // temp commented 
+    // const exists = await News.findOne({ link: newsData.link });
+    // if (exists) {
+    //   console.log(`⚠️ News already exists: ${newsData.link}`);
+    //   return null;
+    // }
 
     const news = new News(newsData);
     await news.save();
