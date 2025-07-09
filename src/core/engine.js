@@ -5,6 +5,7 @@ const Source = require('../models/Source');
 const News = require('../models/News');
 const saveHtmlToFile = require('./saveHtml');
 const saveNewsItem = require('./saveNews');
+const fetchArticleContent = require('./fetchContent');
 
 const parser = new RSSParser();
 
@@ -36,7 +37,13 @@ async function processSource(source) {
   }
 
   for (const item of items) {
-    const result = await fetchArticleContent(item.link, source.tagClassName, source.secondTag);
+    const result = await fetchArticleContent(
+      item.link,
+      source.tagClassName,
+      source.removeTags,
+      source.cutAfter
+    );
+    
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
       continue;
@@ -86,40 +93,6 @@ async function fetchRSSFeed(rssURL) {
   } catch (error) {
     console.error(`❌ Error fetching RSS feed ${rssURL}:`, error.message);
     return [];
-  }
-}
-
-async function fetchArticleContent(url, tagClassName, secondTag) {
-  try {
-    // temp Url for test:
-    url = 'https://www.asriran.com/fa/news/1074946/'
-    tagClassName = '.body'
-    const response = await got(url);
-    const $ = cheerio.load(response.body, { decodeEntities: false });
-
-    let contentHtml = '';
-    let contentText = '';
-
-    if (tagClassName) {
-      if (secondTag) {
-        contentHtml = $(`${tagClassName} ${secondTag}`).html() || '';
-        contentText = $(`${tagClassName} ${secondTag}`).text() || '';
-      } else {
-        contentHtml = $(tagClassName).html() || '';
-        contentText = $(tagClassName).text() || '';
-      }
-    } else {
-      contentHtml = $('body').html() || '';
-      contentText = $('body').text() || '';
-    }
-
-    console.log('main content================');
-    // console.log(contentHtml);
-
-    return { contentHtml: contentHtml.trim(), contentText: contentText.trim() };
-  } catch (error) {
-    console.error(`❌ Error fetching article ${url}:`, error.message);
-    return null;
   }
 }
 

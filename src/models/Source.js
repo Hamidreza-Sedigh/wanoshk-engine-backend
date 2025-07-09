@@ -16,7 +16,9 @@ const SourceSchema = new mongoose.Schema({
     subCategoryEn : String,
     lastTimeFetch: Date,
     status: String,
-    enable: Boolean
+    enable: Boolean,
+    removeTags: [String],
+    cutAfter: String
 })
 
 module.exports = mongoose.model('Source', SourceSchema)
