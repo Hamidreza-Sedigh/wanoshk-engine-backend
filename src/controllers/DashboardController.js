@@ -111,7 +111,7 @@ module.exports = {
         console.log("req:::", req.params);
         try {
             const news = await News.findById(newsId);
-            console.log("news:", news);
+            //console.log("news:", news);
             return res.json(news)
         } catch (error) {
             return res.status(400).json({

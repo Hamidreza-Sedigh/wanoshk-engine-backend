@@ -41,12 +41,14 @@ async function processSource(source) {
       item.link,
       source.tagClassName,
       source.removeTags,
-      source.cutAfter
+      source.cutAfter,
+      source.siteAddress
     );
     
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
-      continue;
+      //continue; //temp commented
+      //break;
     }
 
     const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);

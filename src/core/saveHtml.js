@@ -19,7 +19,7 @@ function saveHtmlToFile(htmlContent, titleOrLink) {
     const filePath = path.join(folderPath, fileName);
 
     fs.writeFileSync(filePath, htmlContent, 'utf8');
-    console.log(`📄 HTML file saved: ${fileName}`);
+    //console.log(`📄 HTML file saved: ${fileName}`);
 
     return filePath;
   } catch (error) {
