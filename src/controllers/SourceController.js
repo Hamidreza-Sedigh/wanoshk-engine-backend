@@ -23,6 +23,48 @@ module.exports = {
         });
     },
 
+    getDistinctSources(req,res){
+        jwt.verify(req.token, 'secret', async(err, authData) => {
+            if(err){
+                res.sendStatus(401);
+            } else {
+                try {
+                    const sources = await Source.distinct("sourceName");
+                    if(sources){
+                        console.log("sources:", sources);
+                        console.log("response::");
+                        // console.log(json({authData, sources}));
+                        return res.json({authData, sources})
+                    }    
+                } catch (error) {
+                    console.log(error);
+                    return res.status(400).json({ message: 'we dont have any sources yet'});
+                }
+            }
+        });
+    },
+    getOneSource(req,res){
+        jwt.verify(req.token, 'secret', async(err, authData) => {
+            if(err){
+                res.sendStatus(401);
+            } else {
+                console.log("req.params:",req.params);
+                const { sourceName  } = req.params;
+                const query = sourceName  ? { sourceName } : {} ;
+                try {
+                    const sources = await Source.find(query);
+                    if(sources){
+                        console.log("sources:", sources);
+                        return res.json({authData, sources})
+                    }    
+                } catch (error) {
+                    console.log(error);
+                    return res.status(400).json({ message: 'we dont have any sources yet'});
+                }
+            }
+        });
+    },
+
     createSource(req, res){
         jwt.verify(req.token, 'secret', async(err, authData) => {
             if (err) {

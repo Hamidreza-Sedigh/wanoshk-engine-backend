@@ -42,6 +42,8 @@ routes.get('/event/:eventId',verifyToken, DashboardController.getEventById)
 console.log("test in routes.");
 routes.post('/addSource', verifyToken, upload.single("thumbnail"), SourceController.createSource);
 routes.get('/getAllSources', verifyToken, SourceController.getAllSources);
+routes.get('/getDistinctSources', verifyToken, SourceController.getDistinctSources);
+routes.get('/getOneSource/:sourceName', verifyToken, SourceController.getOneSource);
 
 //infos:
 routes.get('/getLastTime',  verifyToken, DashboardController.getLastTime);

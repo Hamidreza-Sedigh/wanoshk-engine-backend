@@ -14,8 +14,8 @@ const cheerio = require('cheerio');
 async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter = null, siteAddress) {
   try {
     // temp Url for test:
-    url = 'https://fararu.com/fa/news/882774/'
-    tagClassName = '#echo_detail'
+    url = 'https://www.rokna.net/%D8%A8%D8%AE%D8%B4-%D8%A7%D8%AE%D8%A8%D8%A7%D8%B1-%D8%B3%DB%8C%D8%A7%D8%B3%DB%8C-74/1138365-%D8%B4%D8%B1%D8%B7-%D9%87%D8%A7%DB%8C-%D8%A7%D8%B5%D9%84%DB%8C-%D9%85%D8%B0%D8%A7%DA%A9%D8%B1%D9%87-%D8%A8%D8%A7-%D8%A2%D9%85%D8%B1%DB%8C%DA%A9%D8%A7-%D8%A8%D9%87-%D8%B1%D9%88%D8%A7%DB%8C%D8%AA-%D9%85%D8%A7%D9%84%DA%A9-%D8%B4%D8%B1%DB%8C%D8%B9%D8%AA%DB%8C'
+    tagClassName = '.article-body'
 
     //<div itemprop="articleBody" class="item-text">
     const response = await got(url);
@@ -37,9 +37,11 @@ async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter 
       console.log('####TEST:', target)
       // 🔥 تگ‌هایی که می‌خوای حذف بشن
       //test part:
-      // target.find('#MV_afterBody').nextAll().remove();
-      target.find('span.close_adv').remove();
-
+      target.find('.news-bottom-link').nextAll().remove();
+      target.find('.news-bottom-link').remove();
+      target.find('.inline-news-box').remove();
+      target.find('.margin-bottom-16').remove();
+      
 
       // target.find('script').remove(); // حذف تگ‌های script
       // target.find('style').remove();  // حذف تگ‌های style
@@ -66,12 +68,6 @@ async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter 
       contentText = target.text() || '';
 
       console.log("test before test local.");
-
-      // let teststr = "aaaaaaaaaaaa src bbbbbbbb";
-      // let sub = teststr.split('src');
-      // console.log(teststr);
-      // console.log(sub);
-
 
 
       // if(sourceObj.isLocalImg){

@@ -65,7 +65,7 @@ app.use(routes);
 //const engineStatusDB = find from db
 //const engineStatusFile = fetch from file
 //if(engineStatusDB && engineStatusFile)
-const tempSatus = true
+const tempSatus = false
 if(tempSatus)
     engine.start();
 // setInterval(function(){

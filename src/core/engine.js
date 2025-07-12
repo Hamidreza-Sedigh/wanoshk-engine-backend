@@ -48,7 +48,7 @@ async function processSource(source) {
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
       //continue; //temp commented
-      //break;
+      break;
     }
 
     const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
