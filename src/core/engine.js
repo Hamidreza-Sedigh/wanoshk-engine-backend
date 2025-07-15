@@ -37,13 +37,7 @@ async function processSource(source) {
   }
 
   for (const item of items) {
-    const result = await fetchArticleContent(
-      item.link,
-      source.tagClassName,
-      source.removeTags,
-      source.cutAfter,
-      source.siteAddress
-    );
+    const result = await fetchArticleContent( item.link,source );
     
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
@@ -53,6 +47,8 @@ async function processSource(source) {
 
     const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
     
+    const imageUrl = item.enclosure?.url || null;
+    // call faunction check URL
 
     const newsData = {
       sourceName: source.sourceName,
@@ -69,7 +65,8 @@ async function processSource(source) {
       categoryEn: source.isCategorized ? source.categoryEn : '',
       subCategory: source.isSubCategorized ? source.subCategory : '',
       subCategoryEn: source.isSubCategorized ? source.subCategoryEn : '',
-      views: 0
+      views: 0,
+      imageUrl: imageUrl
     };
 
 

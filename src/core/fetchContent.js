@@ -2,6 +2,7 @@
 
 const got = require('got');
 const cheerio = require('cheerio');
+const { fixHtmlResourceUrls } = require('../utils/rss');
 
 /**
  * دریافت محتوای HTML و متن خبر از یک لینک مشخص با استفاده از cheerio
@@ -11,7 +12,8 @@ const cheerio = require('cheerio');
  * @param {string} cutAfter - selector برای جایی که از آن به بعد حذف شود 
  * @returns {Promise<{ contentHtml: string, contentText: string }|null>}
  */
-async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter = null, siteAddress) {
+ async function fetchArticleContent(url, source) {
+  const { tagClassName, removeTags = [], cutAfter = null, siteAddress } = source;
   try {
     // temp Url for test:
     url = 'https://www.rokna.net/%D8%A8%D8%AE%D8%B4-%D8%A7%D8%AE%D8%A8%D8%A7%D8%B1-%D8%B3%DB%8C%D8%A7%D8%B3%DB%8C-74/1138365-%D8%B4%D8%B1%D8%B7-%D9%87%D8%A7%DB%8C-%D8%A7%D8%B5%D9%84%DB%8C-%D9%85%D8%B0%D8%A7%DA%A9%D8%B1%D9%87-%D8%A8%D8%A7-%D8%A2%D9%85%D8%B1%DB%8C%DA%A9%D8%A7-%D8%A8%D9%87-%D8%B1%D9%88%D8%A7%DB%8C%D8%AA-%D9%85%D8%A7%D9%84%DA%A9-%D8%B4%D8%B1%DB%8C%D8%B9%D8%AA%DB%8C'
@@ -23,13 +25,6 @@ async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter 
 
     let contentHtml = '';
     let contentText = '';
-    
-    // $('img').each(function () {
-    //   const dataSrc = $(this).attr('data-src');
-    //   if (dataSrc) {
-    //     $(this).attr('src', dataSrc);
-    //   }
-    // });
 
     if (tagClassName) {
       const target = $(tagClassName);
@@ -39,14 +34,8 @@ async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter 
       //test part:
       target.find('.news-bottom-link').nextAll().remove();
       target.find('.news-bottom-link').remove();
-      target.find('.inline-news-box').remove();
-      target.find('.margin-bottom-16').remove();
-      
 
-      // target.find('script').remove(); // حذف تگ‌های script
-      // target.find('style').remove();  // حذف تگ‌های style
-      // target.find('div.share-buttons').remove(); // حذف با کلاس خاص
-      
+      // target.find('script').remove(); // حذف تگ‌های script // target.find('style').remove();  // حذف تگ‌های style
       
       // ✅ حذف تگ‌ها یا کلاس‌های مزاحم
       if (Array.isArray(removeTags)) {
@@ -64,31 +53,21 @@ async function fetchArticleContent(url, tagClassName, removeTags = [], cutAfter 
       //   }
       // }
 
-      contentHtml = target.html() || '';
+
+      // some website use for laze loading
+      target.find('img').each(function () {
+        const dataSrc = $(this).attr('data-src');
+        if (dataSrc) {
+          $(this).attr('src', dataSrc);
+        }
+      });
+
+      // ✅ اصلاح آدرس‌های لوکال در منابع تصویری/ویدیویی
+      let rawHtml = target.html() || '';
+      // contentHtml = fixHtmlResourceUrls(rawHtml, siteAddress);
+      // contentHtml = target.html() || '';
+      contentHtml = source.isLocalImg ? fixHtmlResourceUrls(rawHtml, siteAddress) : rawHtml;
       contentText = target.text() || '';
-
-      console.log("test before test local.");
-
-
-      // if(sourceObj.isLocalImg){
-      // if( 2 > 1 ){
-      //   if(contentHtml.includes('src="/')){
-      //     console.log("+++++++++++++++++++++++if 2 of local is working.");
-      //     console.log("+++con:",contentHtml);
-      //     var res = contentHtml.split('src="');
-      //     console.log("+++res:",res);
-      //     var result = res[0];
-      //     console.log("isLoc Result:", result);
-      //     if(res.length > 1){
-      //         for(var k =0; k < res.length-1 ; k++){
-      //             var result = result + 'src="' + siteAddress + res[k+1] ;
-      //         }
-      //         contentHtml = result;
-      //     }
-      //   }
-      // }
-      // console.log("+++after:", contentHtml)
-
 
     } else {
       contentHtml = $('body').html() || '';

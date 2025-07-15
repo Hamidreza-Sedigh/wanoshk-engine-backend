@@ -14,7 +14,11 @@ const NewsSchema = new mongoose.Schema({
     categoryEn: String,
     subCategory : String,
     subCategoryEn : String,
-    views: Number
+    views: Number,
+    imageUrl: {
+        type: String,
+        default: null, // اگر enclosure نبود، مقدار null ذخیره میشه
+      },
 })
 
 module.exports = mongoose.model('News', NewsSchema)
