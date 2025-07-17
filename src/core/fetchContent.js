@@ -35,7 +35,8 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
       target.find('.news-bottom-link').nextAll().remove();
       target.find('.news-bottom-link').remove();
 
-      // target.find('script').remove(); // حذف تگ‌های script // target.find('style').remove();  // حذف تگ‌های style
+      target.find('script').remove(); // حذف تگ‌های script 
+      target.find('style').remove();  // حذف تگ‌های style
       
       // ✅ حذف تگ‌ها یا کلاس‌های مزاحم
       if (Array.isArray(removeTags)) {
@@ -45,28 +46,29 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
       }
 
       // ✅ حذف همه عناصر بعد از یک نقطه مشخص (مثل .social_nets)
-      // if (cutAfter) {
-      //   const cutPoint = target.find(cutAfter);
-      //   if (cutPoint.length > 0) {
-      //     cutPoint.nextAll().remove();  // حذف همه بعد از آن
-      //     cutPoint.remove();            // حذف خودش
-      //   }
-      // }
-
-
-      // some website use for laze loading
-      target.find('img').each(function () {
-        const dataSrc = $(this).attr('data-src');
-        if (dataSrc) {
-          $(this).attr('src', dataSrc);
+      if (cutAfter) {
+        const cutPoint = target.find(cutAfter);
+        if (cutPoint.length > 0) {
+          cutPoint.nextAll().remove();  // حذف همه بعد از آن
+          cutPoint.remove();            // حذف خودش
         }
-      });
+      }
+
 
       // ✅ اصلاح آدرس‌های لوکال در منابع تصویری/ویدیویی
       let rawHtml = target.html() || '';
-      // contentHtml = fixHtmlResourceUrls(rawHtml, siteAddress);
-      // contentHtml = target.html() || '';
-      contentHtml = source.isLocalImg ? fixHtmlResourceUrls(rawHtml, siteAddress) : rawHtml;
+      const needsFix =
+        source.isLocalImg ||
+        rawHtml.includes('data-src') ||
+        rawHtml.includes('data-original') ||
+        rawHtml.includes('data-lazy-src') ||
+        rawHtml.includes('data-lazyload') ||
+        rawHtml.includes('lazy-src');
+
+      contentHtml = needsFix
+        ? fixHtmlResourceUrls(rawHtml, siteAddress)
+        : rawHtml;
+
       contentText = target.text() || '';
 
     } else {
