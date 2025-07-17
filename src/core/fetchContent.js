@@ -13,15 +13,25 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
  * @returns {Promise<{ contentHtml: string, contentText: string }|null>}
  */
  async function fetchArticleContent(url, source) {
-  const { tagClassName, removeTags = [], cutAfter = null, siteAddress } = source;
-  try {
-    // temp Url for test:
-    url = 'https://www.rokna.net/%D8%A8%D8%AE%D8%B4-%D8%A7%D8%AE%D8%A8%D8%A7%D8%B1-%D8%B3%DB%8C%D8%A7%D8%B3%DB%8C-74/1138365-%D8%B4%D8%B1%D8%B7-%D9%87%D8%A7%DB%8C-%D8%A7%D8%B5%D9%84%DB%8C-%D9%85%D8%B0%D8%A7%DA%A9%D8%B1%D9%87-%D8%A8%D8%A7-%D8%A2%D9%85%D8%B1%DB%8C%DA%A9%D8%A7-%D8%A8%D9%87-%D8%B1%D9%88%D8%A7%DB%8C%D8%AA-%D9%85%D8%A7%D9%84%DA%A9-%D8%B4%D8%B1%DB%8C%D8%B9%D8%AA%DB%8C'
-    tagClassName = '.article-body'
+  // const { tagClassName, removeTags = [], cutAfter = null, siteAddress } = source;
+  let { tagClassName, removeTags = [], cutAfter = null, siteAddress } = source;
+  console.log("test before try");
 
+  try {
+    
+    // temp Url for test:
+    url = 'https://www.isna.ir/news/1404042616251/'
+    // url = 'https://www.asriran.com/fa/news/1077602/'
+    tagClassName = '.body'
+    tagClassName = ''
+
+    console.log("test before url");
     //<div itemprop="articleBody" class="item-text">
     const response = await got(url);
+    console.log("response:",response);
     const $ = cheerio.load(response.body, { decodeEntities: false });
+
+    console.log("$:",$);
 
     let contentHtml = '';
     let contentText = '';
@@ -88,6 +98,7 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
     };
   } catch (error) {
     console.error(`❌ Error fetching article ${url}:`, error.message);
+    console.error(error);
     return null;
   }
 }
