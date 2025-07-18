@@ -6,7 +6,7 @@ const News = require('../models/News');
 const saveHtmlToFile = require('./saveHtml');
 const saveNewsItem = require('./saveNews');
 const fetchArticleContent = require('./fetchContent');
-
+const { toAbsoluteUrl } = require('../utils/rss');
 const parser = new RSSParser();
 
 async function start() {
@@ -47,9 +47,11 @@ async function processSource(source) {
 
     const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
     
-    const imageUrl = item.enclosure?.url || null;
-    // call faunction check URL
+    
+    const enclosureUrl = item.enclosure?.url || null;
+    const imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress); // siteAddress همون آدرس سایت اصلی هر فید هست
 
+    console.log("item.description:", item.description);
     const newsData = {
       sourceName: source.sourceName,
       siteAddress: source.siteAddress,

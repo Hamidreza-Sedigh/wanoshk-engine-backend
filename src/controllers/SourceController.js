@@ -65,6 +65,32 @@ module.exports = {
         });
     },
 
+    async toggleStatus(req,res){
+        console.log("toggleStatus Started...");
+        try {
+            const { id, enable } = req.body;
+            console.log(id, enable);
+       
+            const updatedSource = await Source.findByIdAndUpdate(
+            id,
+            { enable },
+            { new: true }
+            );
+
+            if (!updatedSource) {
+            return res.status(404).json({ message: 'منبع یافت نشد' });
+            }
+
+            // res.json(updatedSource);
+            res.status(200).json(updatedSource); // صریحاً status 200 بفرستید
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'خطا در سرور' });
+        }
+    },
+
+
     createSource(req, res){
         jwt.verify(req.token, 'secret', async(err, authData) => {
             if (err) {

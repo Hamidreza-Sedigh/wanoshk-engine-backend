@@ -20,18 +20,18 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
   try {
     
     // temp Url for test:
-    url = 'https://www.isna.ir/news/1404042616251/'
+    // url = 'https://www.isna.ir/news/1404042616251/'
     // url = 'https://www.asriran.com/fa/news/1077602/'
-    tagClassName = '.body'
-    tagClassName = ''
+    // tagClassName = '.body'
+    // tagClassName = ''
 
     console.log("test before url");
     //<div itemprop="articleBody" class="item-text">
     const response = await got(url);
-    console.log("response:",response);
+    // console.log("response:",response);
     const $ = cheerio.load(response.body, { decodeEntities: false });
 
-    console.log("$:",$);
+    // console.log("$:",$);
 
     let contentHtml = '';
     let contentText = '';
@@ -39,11 +39,10 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
     if (tagClassName) {
       const target = $(tagClassName);
       
-      console.log('####TEST:', target)
       // 🔥 تگ‌هایی که می‌خوای حذف بشن
       //test part:
-      target.find('.news-bottom-link').nextAll().remove();
-      target.find('.news-bottom-link').remove();
+      target.find('#MV_afterBody').nextAll().remove();
+      target.find('#MV_afterBody').remove();
 
       target.find('script').remove(); // حذف تگ‌های script 
       target.find('style').remove();  // حذف تگ‌های style

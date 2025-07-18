@@ -63,4 +63,7 @@ routes.get('/registration/:registration_id', RegistrationController.getRegistrat
 routes.post('/registration/:registration_id/approvals', verifyToken, ApprovalController.approval);
 routes.post('/registration/:registration_id/rejections', verifyToken, RejectionController.rejection);
 
+// new: 
+routes.put('/api/sources/toggle-status', SourceController.toggleStatus);
+
 module.exports = routes;
