@@ -7,7 +7,12 @@ const saveHtmlToFile = require('./saveHtml');
 const saveNewsItem = require('./saveNews');
 const fetchArticleContent = require('./fetchContent');
 const { toAbsoluteUrl } = require('../utils/rss');
-const parser = new RSSParser();
+
+const parser = new RSSParser({
+  customFields: {
+    item: ['description'] // اجباراً description را از RSS می‌گیرد
+  }
+});
 
 async function start() {
   console.log('🚀 Engine started.');
@@ -50,14 +55,14 @@ async function processSource(source) {
     
     const enclosureUrl = item.enclosure?.url || null;
     const imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress); // siteAddress همون آدرس سایت اصلی هر فید هست
-
-    console.log("item.description:", item.description);
+    
+    // console.log("item:", item);
+    
     const newsData = {
       sourceName: source.sourceName,
       siteAddress: source.siteAddress,
       title: item.title || '',
-      description: item.description || '',
-      summary: item.contentSnippet || '',
+      description: item.description || item.contentSnippet || '',  // توضیح یا خلاصه
       link: item.link,
       // passage: result.contentText,
       passage: result.contentHtml,
