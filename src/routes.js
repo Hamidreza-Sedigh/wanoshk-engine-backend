@@ -12,14 +12,15 @@ const RejectionController = require('./controllers/RejectionController');
 const SourceController = require('./controllers/SourceController');
 const uploadConfig = require('./config/upload');
 const ContactUsController = require('./controllers/ContactUsController');
+const EngineController = require('./controllers/EngineController');
 
 const routes = express.Router();
 const upload = multer(uploadConfig);
 
 
-routes.get('/status', (req, res)=>{
-    res.send({ status : 200})
-});
+//routes.get('/status', (req, res)=>{  res.send({ status : 200}) }); // jean
+routes.get('/status', EngineController.getStatus);
+routes.post('/status', EngineController.updateStatus);
 
 //TODO: add todo extension VSCODE
 //new ones:

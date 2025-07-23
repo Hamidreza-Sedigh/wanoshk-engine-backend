@@ -14,6 +14,8 @@ const app =      express();
 const server = http.Server(app);
 const io = socketio(server); 
 
+const EngineStatus = require('./models/EngineStatus');
+
 console.log("test1");
 
 if(process.env.NODE_ENV !== 'production' ){
@@ -65,15 +67,45 @@ app.use(routes);
 //const engineStatusDB = find from db
 //const engineStatusFile = fetch from file
 //if(engineStatusDB && engineStatusFile)
-const tempSatus = true
+const tempSatus = false
 if(tempSatus)
     engine.start();
+
 // setInterval(function(){
 //     // engineStatusDB = find from db
 //     // engineStatusFile = fetch from file
 //     if(tempSatus)
 //         engine.start();
 // }, 2 * 60 * 1000); //2min
+
+// with loc new:
+let isEngineRunning = false;
+async function engineStart() {
+    if (isEngineRunning) {
+      console.log('⏳ Engine already running, skipping...');
+      return;
+    }
+    
+    isEngineRunning = true;
+    console.log('🚀 Engine started.');
+  
+    try {
+      // اینجا منطق اصلی موتور برای پردازش RSS
+      await engine.start();
+    } catch (err) {
+      console.error('❌ Engine error:', err.message);
+    } finally {
+      isEngineRunning = false;
+      console.log('🏁 Engine finished.');
+    }
+}
+// هر 1 دقیقه وضعیت موتور را از دیتابیس بررسی می‌کند
+setInterval(async () => {
+    const engine = await EngineStatus.findOne();
+    if (engine?.status) {
+      await engineStart();
+    }
+  }, 1 * 60 * 1000); // 1 دقیقه
 
 
 //app.listen(Port, ()=>{  // it was without socket

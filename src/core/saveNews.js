@@ -40,4 +40,18 @@ async function saveNewsItem(newsData) {
   }
 }
 
-module.exports = saveNewsItem;
+// تابع جدید برای درج گروهی
+async function saveNewsBulk(newsArray) {
+  if (!newsArray.length) return [];
+
+  try {
+    const result = await News.insertMany(newsArray, { ordered: false });
+    console.log(`✅ Bulk insert completed: ${result.length} items saved`);
+    return result;
+  } catch (error) {
+    console.error('❌ Error during bulk insert:', error.message);
+    return [];
+  }
+}
+
+module.exports = { saveNewsItem, saveNewsBulk };

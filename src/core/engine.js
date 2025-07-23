@@ -5,6 +5,7 @@ const Source = require('../models/Source');
 const News = require('../models/News');
 const saveHtmlToFile = require('./saveHtml');
 const saveNewsItem = require('./saveNews');
+const { saveNewsBulk } = require('./saveNews');
 const fetchArticleContent = require('./fetchContent');
 const { toAbsoluteUrl } = require('../utils/rss');
 
@@ -41,24 +42,51 @@ async function processSource(source) {
     return;
   }
 
+  // مرحله 1: یک‌بار همه لینک‌ها را از DB بررسی کن
+  const links = items.map(item => item.link);
+  const existingLinks = await News.find(
+    { link: { $in: links } },
+    { link: 1, _id: 0 }
+  ).lean();
+  const existingSet = new Set(existingLinks.map(n => n.link));
+
+  const newItems = [];
   for (const item of items) {
-    const result = await fetchArticleContent( item.link,source );
-    
+    // ✅ اول بررسی تکراری بودن لینک در دیتابیس
+    // const exists = await News.findOne({ link: item.link });
+    // // if (exists) {
+    // //   console.log(`⏹️ Duplicate found (${item.link}), stopping loop.`);
+    // //   break; // بقیه آیتم‌ها هم قدیمی هستند، پس حلقه را متوقف کن
+    // // }
+
+    if (existingSet.has(item.link)) {
+      console.log(`⏹️ Duplicate found (${item.link}), stopping loop.`);
+      break;
+    }
+    newItems.push(item);
+  }
+  if (!newItems.length) {
+    console.log('ℹ️ No new items to process.');
+    return;
+  }
+  // مرحله 3: دانلود محتوا برای آیتم‌های جدید
+  const newsArray = [];
+  for (const item of newItems) {
+    const result = await fetchArticleContent(item.link, source);
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
-      //continue; //temp commented
-      break;
+      continue; //temp commented dorostesh mishe continue movaghatan break.
+      // break;
     }
 
     const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
-    
-    
+        
     const enclosureUrl = item.enclosure?.url || null;
     const imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress); // siteAddress همون آدرس سایت اصلی هر فید هست
     
     // console.log("item:", item);
-    
-    const newsData = {
+    // const newsData = {
+    newsArray.push({
       sourceName: source.sourceName,
       siteAddress: source.siteAddress,
       title: item.title || '',
@@ -74,13 +102,13 @@ async function processSource(source) {
       subCategoryEn: source.isSubCategorized ? source.subCategoryEn : '',
       views: 0,
       imageUrl: imageUrl
-    };
+    });
 
-
-    await saveNewsItem(newsData);
-
-    break; // temp test!!!!!!!!!!!!!!!!!!!!!!!!!   <---  << << << <<========
+    // await saveNewsItem(newsData);
+    // break; // temp test!!!!!!!!!!!!!!!!!!!!!!!!!   <---  << << << <<========
   }
+  await saveNewsBulk(newsArray);
+
 
   // به‌روزرسانی تاریخ آخرین بارگذاری منبع
   try {
