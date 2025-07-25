@@ -18,7 +18,14 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
   console.log("test before try");
 
   try {
-    console.log("test start fetch");
+    console.log("----TEST FETCH");
+    console.log("source:",source);
+    // temp Url for test:
+    url = 'https://www.asriran.com/fa/news/1079379/'
+    tagClassName = '.body'
+    
+
+    console.log("test before url");
     //<div itemprop="articleBody" class="item-text">
     const response = await got(url);
     // console.log("response:",response);
@@ -32,6 +39,20 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
     if (tagClassName) {
       const target = $(tagClassName);
       
+      // 🔥 تگ‌هایی که می‌خوای حذف بشن
+      //test part:
+      target.find('#MV_afterBody').nextAll().remove();
+      target.find('#MV_afterBody').remove();
+
+      target.find('script').remove(); // حذف تگ‌های script 
+      target.find('style').remove();  // حذف تگ‌های style
+      
+      // ✅ حذف تگ‌ها یا کلاس‌های مزاحم
+      if (Array.isArray(removeTags)) {
+        for (const tag of removeTags) {
+          target.find(tag).remove();
+        }
+      }
 
       // ✅ حذف همه عناصر بعد از یک نقطه مشخص (مثل .social_nets)
       if (cutAfter) {
@@ -42,22 +63,7 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
         }
       }
 
-      // 🔥 تگ‌هایی که می‌خوای حذف بشن
-      //test part:
-      // target.find('#MV_afterBody').nextAll().remove();
-      // target.find('#MV_afterBody').remove();
-      target.find('script').remove(); // حذف تگ‌های script 
-      target.find('style').remove();  // حذف تگ‌های style
-      
-      console.log("removeTags:",removeTags);
-      // ✅ حذف تگ‌ها یا کلاس‌های مزاحم
-      if (Array.isArray(removeTags)) {
-        for (const tag of removeTags) {
-          target.find(tag).remove();
-        }
-      }
-
-
+      console.log("source.isLocalImg:",source.isLocalImg);
       // ✅ اصلاح آدرس‌های لوکال در منابع تصویری/ویدیویی
       let rawHtml = target.html() || '';
       const needsFix =

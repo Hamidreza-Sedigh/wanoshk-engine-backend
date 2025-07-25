@@ -102,8 +102,9 @@ module.exports = {
                     const {sourceName, sourceNameEn, siteAddress, rssURL, tagClassName, 
                         secondTag, isLocalImg, 
                         isCategorized, category, categoryEn,
-                        isSubCategorized, subCategory, subCategoryEn
+                        isSubCategorized, subCategory, subCategoryEn, cutAfter
                     } = req.body;
+                    const removeTags = JSON.parse(req.body.removeTags || '[]');
                     const existenSource = await Source.findOne({rssURL});
                     console.log("existenSource:", existenSource);
                     if(!existenSource){
@@ -122,7 +123,9 @@ module.exports = {
                             subCategory, 
                             subCategoryEn,
                             status: 'A',
-                            enable: true
+                            enable: true,
+                            removeTags, 
+                            cutAfter
                             
                         });
                         console.log("DONE! sourceAdded");

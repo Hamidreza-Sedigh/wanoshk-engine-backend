@@ -7,6 +7,7 @@ const http =     require('http');
 const socketio = require('socket.io');
 const bodyParser = require('body-parser');
 const engine =   require('./core/engine');
+const engineTest =   require('./core/engine-test');
 const Port = process.env.PORT || 8080
 
 
@@ -99,6 +100,8 @@ async function engineStart() {
       console.log('🏁 Engine finished.');
     }
 }
+
+engineStart()
 // هر 1 دقیقه وضعیت موتور را از دیتابیس بررسی می‌کند
 setInterval(async () => {
     const engine = await EngineStatus.findOne();
@@ -107,6 +110,9 @@ setInterval(async () => {
     }
   }, 1 * 60 * 1000); // 1 دقیقه
 
+let testSingleMode = false
+if (testSingleMode)
+  engineTest.start();
 
 //app.listen(Port, ()=>{  // it was without socket
 server.listen(Port, ()=>{   // with socket

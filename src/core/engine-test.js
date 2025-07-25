@@ -4,9 +4,9 @@ const cheerio = require('cheerio');
 const Source = require('../models/Source');
 const News = require('../models/News');
 const saveHtmlToFile = require('./saveHtml');
-const saveNewsItem = require('./saveNews');
+const {saveNewsItem} = require('./saveNews');
 const { saveNewsBulk } = require('./saveNews');
-const fetchArticleContent = require('./fetchContent');
+const fetchArticleContent = require('./fetchContentTest');
 const { toAbsoluteUrl } = require('../utils/rss');
 
 const parser = new RSSParser({
@@ -16,11 +16,11 @@ const parser = new RSSParser({
 });
 
 async function start() {
-  console.log('🚀 Engine started.');
+  console.log('🚀 Engine started.IN TEST ROUTE');
 
   try {
     const sources = await Source.find({ enable: true });
-    console.log(`🔍 Found ${sources.length} enabled sources.`);
+    console.log(`🔍 Found ${sources.length} enabled sources. TEST ROUTE`);
 
     for (const source of sources) {
       await processSource(source);
@@ -28,7 +28,8 @@ async function start() {
 
     console.log('🏁 Engine finished all sources. ');
   } catch (error) {
-    console.error('❌ Engine error:', error.message);
+    console.log('❌ Engine error:', error.message);
+    // console.error('❌ Engine error:', error.message);
   }
 }
 
@@ -42,36 +43,9 @@ async function processSource(source) {
     return;
   }
 
-  // مرحله 1: یک‌بار همه لینک‌ها را از DB بررسی کن
-  const links = items.map(item => item.link);
-  const existingLinks = await News.find(
-    { link: { $in: links } },
-    { link: 1, _id: 0 }
-  ).lean();
-  const existingSet = new Set(existingLinks.map(n => n.link));
-
-  const newItems = [];
   for (const item of items) {
-    // ✅ اول بررسی تکراری بودن لینک در دیتابیس
-    // const exists = await News.findOne({ link: item.link });
-    // // if (exists) {
-    // //   console.log(`⏹️ Duplicate found (${item.link}), stopping loop.`);
-    // //   break; // بقیه آیتم‌ها هم قدیمی هستند، پس حلقه را متوقف کن
-    // // }
-
-    if (existingSet.has(item.link)) {
-      console.log(`⏹️ Duplicate found (${item.link}), stopping loop.`);
-      break;
-    }
-    newItems.push(item);
-  }
-  if (!newItems.length) {
-    console.log('ℹ️ No new items to process.');
-    return;
-  }
-  // مرحله 3: دانلود محتوا برای آیتم‌های جدید
-  const newsArray = [];
-  for (const item of newItems) {
+    
+    // مرحله 3: دانلود محتوا برای آیتم‌های جدید
     const result = await fetchArticleContent(item.link, source);
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
@@ -79,16 +53,14 @@ async function processSource(source) {
       // break;
     }
 
-    const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
+    // const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
         
     const enclosureUrl = item.enclosure?.url || null;
-    let imageUrl = "";
-    if (enclosureUrl)
-      imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress);
+    const imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress); // siteAddress همون آدرس سایت اصلی هر فید هست
     
     // console.log("item:", item);
-    // const newsData = {
-    newsArray.push({
+    const newsData = {
+    // newsArray.push({
       sourceName: source.sourceName,
       siteAddress: source.siteAddress,
       title: item.title || '',
@@ -104,12 +76,12 @@ async function processSource(source) {
       subCategoryEn: source.isSubCategorized ? source.subCategoryEn : '',
       views: 0,
       imageUrl: imageUrl
-    });
+    };
 
-    // await saveNewsItem(newsData);
-    // break; // temp test!!!!!!!!!!!!!!!!!!!!!!!!!   <---  << << << <<========
+    await saveNewsItem(newsData);
+    break; // temp test!!!!!!!!!!!!!!!!!!!!!!!!!   <---  << << << <<========
   }
-  await saveNewsBulk(newsArray);
+  // await saveNewsBulk(newsArray);
 
 
   // به‌روزرسانی تاریخ آخرین بارگذاری منبع

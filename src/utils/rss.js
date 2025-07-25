@@ -1,6 +1,23 @@
 const cheerio = require('cheerio');
 
-// ✅ تبدیل آدرس نسبی به absolute
+/**
+ * بررسی اینکه MIME نوع تصویر است یا نه
+ */
+function isImageType(mimeType) {
+  return mimeType?.startsWith('image/');
+}
+
+/**
+ * بررسی اینکه آدرس فعلی یک placeholder است یا نه
+ */
+function isPlaceholderUrl(url) {
+  if (!url) return true;
+  return /blank|pixel|placeholder|defaultpic|defultpic/i.test(url);
+}
+
+/**
+ * تبدیل آدرس نسبی به absolute
+ */
 function toAbsoluteUrl(url, baseUrl) {
   try {
     return new URL(url, baseUrl).href;
@@ -9,18 +26,9 @@ function toAbsoluteUrl(url, baseUrl) {
   }
 }
 
-// ✅ بررسی اینکه MIME نوع تصویر است
-function isImageType(mimeType) {
-  return mimeType?.startsWith('image/');
-}
-
-// ✅ بررسی اینکه یک آدرس placeholder است یا نه
-function isPlaceholderUrl(url) {
-  if (!url) return true;
-  return /blank|pixel|placeholder/i.test(url);
-}
-
-// ✅ جایگزینی src در تگ img از روی data-* اگر لازم بود
+/**
+ * اصلاح src تصاویر از data-* اگر src خالی یا placeholder باشد
+ */
 function fixImageSrcFromDataAttrs($img) {
   const fallbackAttrs = [
     'data-src',
@@ -28,7 +36,7 @@ function fixImageSrcFromDataAttrs($img) {
     'data-lazy-src',
     'data-lazyload',
     'data-img',
-    'lazy-src',
+    'lazy-src'
   ];
 
   const currentSrc = $img.attr('src') || '';
@@ -45,7 +53,9 @@ function fixImageSrcFromDataAttrs($img) {
   }
 }
 
-// ✅ اصلاح آدرس‌های منابع تصویری/ویدیویی نسبی به absolute
+/**
+ * اصلاح آدرس‌های لوکال در منابع تصویری/ویدیویی و جایگزینی lazyload
+ */
 function fixHtmlResourceUrls(html, baseUrl) {
   const $ = cheerio.load(html);
   const tagsWithSrc = ['img', 'video', 'audio', 'source', 'iframe'];
@@ -54,14 +64,14 @@ function fixHtmlResourceUrls(html, baseUrl) {
     $(tag).each((i, el) => {
       const $el = $(el);
 
-      // فقط برای img: اول src رو از data-* اصلاح کن
+      // برای img: اصلاح src از data-*
       if (tag === 'img') {
         fixImageSrcFromDataAttrs($el);
       }
 
-      // سپس آدرس نسبی رو به absolute تبدیل کن
+      // تبدیل آدرس نسبی به absolute
       const src = $el.attr('src');
-      if (src && !src.startsWith('http')) {
+      if (src && !/^https?:\/\//i.test(src)) {
         const fixedUrl = toAbsoluteUrl(src, baseUrl);
         $el.attr('src', fixedUrl);
       }
@@ -72,8 +82,9 @@ function fixHtmlResourceUrls(html, baseUrl) {
 }
 
 module.exports = {
-  toAbsoluteUrl,
   isImageType,
-  fixHtmlResourceUrls,
+  isPlaceholderUrl,
+  toAbsoluteUrl,
   fixImageSrcFromDataAttrs,
+  fixHtmlResourceUrls
 };
