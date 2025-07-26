@@ -1,5 +1,6 @@
 const News = require('../models/News');
-
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6); // 6 کاراکتر
 /**
  * ذخیره یک خبر در دیتابیس MongoDB
  * @param {Object} newsData - داده‌های کامل خبر برای ذخیره‌سازی
@@ -44,8 +45,14 @@ async function saveNewsItem(newsData) {
 async function saveNewsBulk(newsArray) {
   if (!newsArray.length) return [];
 
+  // به هر خبر shortId اضافه کن
+  const newsWithIds = newsArray.map(item => ({
+    ...item,
+    shortId: nanoid(),
+  }));
+
   try {
-    const result = await News.insertMany(newsArray, { ordered: false });
+    const result = await News.insertMany(newsWithIds, { ordered: false });
     console.log(`✅ Bulk insert completed: ${result.length} items saved`);
     return result;
   } catch (error) {
