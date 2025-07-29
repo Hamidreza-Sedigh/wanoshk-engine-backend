@@ -21,6 +21,7 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
     console.log("----TEST FETCH");
     console.log("source:",source);
     // temp Url for test:
+    //https://www.asriran.com/fa/news/1080495/
     url = 'https://www.asriran.com/fa/news/1079379/'
     tagClassName = '.body'
     
