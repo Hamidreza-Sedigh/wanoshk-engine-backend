@@ -143,6 +143,40 @@ module.exports = {
             }
             
         });
+    },
+
+    // حذف سورس
+    async deleteSource(req, res) {
+        try {
+            const { id } = req.params;
+            await Source.deleteOne({ _id: id });
+            res.status(200).json({ message: 'سورس با موفقیت حذف شد' });
+        } catch (err) {
+            console.error('خطا در حذف سورس:', err);
+            res.status(500).json({ error: 'خطا در حذف سورس' });
+        }
+    },
+
+    // ویرایش سورس
+    async editSource(req, res) {
+        try {
+            const { id } = req.params;
+            const update = req.body;
+
+            // فقط مقادیری که از کلاینت اومده رو آپدیت کن
+            const result = await Source.findByIdAndUpdate(id, update, { new: true });
+
+            if (!result) {
+            return res.status(404).json({ error: 'سورس پیدا نشد' });
+            }
+
+            res.status(200).json({ message: 'با موفقیت ویرایش شد', source: result });
+        } catch (err) {
+            console.error('خطا در ویرایش سورس:', err);
+            res.status(500).json({ error: 'خطا در ویرایش سورس' });
+        }
     }
+
+
 
 }

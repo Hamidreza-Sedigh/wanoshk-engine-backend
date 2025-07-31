@@ -45,6 +45,11 @@ routes.post('/addSource', verifyToken, upload.single("thumbnail"), SourceControl
 routes.get('/getAllSources', verifyToken, SourceController.getAllSources);
 routes.get('/getDistinctSources', verifyToken, SourceController.getDistinctSources);
 routes.get('/getOneSource/:sourceName', verifyToken, SourceController.getOneSource);
+routes.put('/api/sources/toggle-status', SourceController.toggleStatus);
+routes.delete('/api/sources/:id', verifyToken, SourceController.deleteSource);
+routes.put('/api/sources/:id', verifyToken, SourceController.editSource);
+
+
 
 //infos:
 routes.get('/getLastTime',  verifyToken, DashboardController.getLastTime);
@@ -64,7 +69,5 @@ routes.get('/registration/:registration_id', RegistrationController.getRegistrat
 routes.post('/registration/:registration_id/approvals', verifyToken, ApprovalController.approval);
 routes.post('/registration/:registration_id/rejections', verifyToken, RejectionController.rejection);
 
-// new: 
-routes.put('/api/sources/toggle-status', SourceController.toggleStatus);
 
 module.exports = routes;
