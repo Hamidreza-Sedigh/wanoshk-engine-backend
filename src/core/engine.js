@@ -72,7 +72,13 @@ async function processSource(source) {
   // مرحله 3: دانلود محتوا برای آیتم‌های جدید
   const newsArray = [];
   for (const item of newItems) {
-    const result = await fetchArticleContent(item.link, source);
+    const enclosureUrl = item.enclosure?.url || null;
+    let imageUrl = "";
+    if (enclosureUrl)
+      imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress);
+
+
+    const result = await fetchArticleContent(item.link, source, item.enclosure?.url);
     if (!result || !result.contentText) {
       console.log(`⚠️ No content found for: ${item.link}`);
       continue; //temp commented dorostesh mishe continue movaghatan break.
@@ -81,10 +87,7 @@ async function processSource(source) {
 
     const htmlFilePath = saveHtmlToFile(result.contentHtml, item.title || item.link);
         
-    const enclosureUrl = item.enclosure?.url || null;
-    let imageUrl = "";
-    if (enclosureUrl)
-      imageUrl = toAbsoluteUrl(enclosureUrl, source.siteAddress);
+    
     
     // console.log("item:", item);
     // const newsData = {
@@ -103,7 +106,7 @@ async function processSource(source) {
       subCategory: source.isSubCategorized ? source.subCategory : '',
       subCategoryEn: source.isSubCategorized ? source.subCategoryEn : '',
       views: 0,
-      imageUrl: imageUrl
+      imageUrl: result.imageUrl || "", // از داخل HTML یا enclosure
     });
 
     // await saveNewsItem(newsData);

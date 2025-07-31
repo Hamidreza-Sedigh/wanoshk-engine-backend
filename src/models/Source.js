@@ -18,6 +18,12 @@ const SourceSchema = new mongoose.Schema({
     status: String,
     enable: Boolean,
     removeTags: [String],
+    removeAttrs: [
+        {
+        selector: String,
+        attr: String,
+        },
+    ],
     cutAfter: String
 })
 

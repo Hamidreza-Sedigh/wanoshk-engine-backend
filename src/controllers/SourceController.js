@@ -105,6 +105,7 @@ module.exports = {
                         isSubCategorized, subCategory, subCategoryEn, cutAfter
                     } = req.body;
                     const removeTags = JSON.parse(req.body.removeTags || '[]');
+                    const removeAttrs = JSON.parse(req.body.removeAttrs || "[]");
                     const existenSource = await Source.findOne({rssURL});
                     console.log("existenSource:", existenSource);
                     if(!existenSource){
@@ -125,6 +126,7 @@ module.exports = {
                             status: 'A',
                             enable: true,
                             removeTags, 
+                            removeAttrs,
                             cutAfter
                             
                         });

@@ -3,6 +3,8 @@
 const got = require('got');
 const cheerio = require('cheerio');
 const { fixHtmlResourceUrls } = require('../utils/rss');
+const { toAbsoluteUrl } = require('../utils/rss');
+
 
 /**
  * دریافت محتوای HTML و متن خبر از یک لینک مشخص با استفاده از cheerio
@@ -12,13 +14,13 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
  * @param {string} cutAfter - selector برای جایی که از آن به بعد حذف شود 
  * @returns {Promise<{ contentHtml: string, contentText: string }|null>}
  */
- async function fetchArticleContent(url, source) {
+ async function fetchArticleContent(url, source, enclosureUrl = null) {
   // const { tagClassName, removeTags = [], cutAfter = null, siteAddress } = source;
-  let { tagClassName, removeTags = [], cutAfter = null, siteAddress } = source;
-  console.log("test before try");
+  let { tagClassName, removeTags = [], cutAfter = null, siteAddress, secondTag, removeAttrs } = source;
+  // console.log("test before try");
 
   try {
-    console.log("test start fetch");
+    // console.log("test start fetch");
     //<div itemprop="articleBody" class="item-text">
     const response = await got(url);
     // console.log("response:",response);
@@ -28,6 +30,7 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
 
     let contentHtml = '';
     let contentText = '';
+    let imageUrl = null;
 
     if (tagClassName) {
       const target = $(tagClassName);
@@ -50,10 +53,17 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
       target.find('style').remove();  // حذف تگ‌های style
       
       console.log("removeTags:",removeTags);
-      // ✅ حذف تگ‌ها یا کلاس‌های مزاحم
       if (Array.isArray(removeTags)) {
         for (const tag of removeTags) {
           target.find(tag).remove();
+        }
+      }
+
+      // حذف attr اضافه . مثلا سایت انتخاب
+      console.log("removeAttrs:",removeAttrs);
+      if (Array.isArray(removeAttrs)) {
+        for (const item of removeAttrs) {
+          target.find(item.selector).removeAttr(item.attr);
         }
       }
 
@@ -74,20 +84,73 @@ const { fixHtmlResourceUrls } = require('../utils/rss');
 
       contentText = target.text() || '';
 
+
+      // let imageUrl = null;
+      if (!enclosureUrl) {
+        let imgSrc = null;
+        if (source.secondTag) {
+          const secondImage = $(source.secondTag).first();  // ⬅️ مستقیم از کل صفحه
+          imgSrc = secondImage.attr('src');
+
+          if (imgSrc) {
+            console.log(`📷 تصویر از secondTag گرفته شد: ${imgSrc}`);
+          } else {
+            console.log(`⚠️ تگی با selector ${source.secondTag} یافت نشد یا img آن src نداشت.`);
+          }
+        }
+        
+        // اگر با secondTag هم پیدا نشد، از اولین تصویر استفاده کن
+        if (!imgSrc) {
+          const firstImg = target.find('img').first();
+          imgSrc = firstImg.attr('src');
+
+          if (imgSrc) {
+            console.log(`📷 تصویر از اولین <img> داخل target گرفته شد: ${imgSrc}`);
+          } else {
+            console.log(`⚠️ هیچ تصویری در محتوای HTML یافت نشد.`, url);
+          }
+        }
+
+        if (imgSrc) {
+          imageUrl = toAbsoluteUrl(imgSrc, siteAddress);
+          console.log(`🔗 آدرس نهایی تصویر: ${imageUrl}`);
+        }
+
+      } else {
+        imageUrl = toAbsoluteUrl(enclosureUrl, siteAddress);
+        console.log(`🟢 تصویر از enclosure گرفته شد: ${imageUrl}`);
+      }
+      
+      // console.log(url);
+      // console.log(imageUrl);
+      // console.log(imageUrl);
+      // if (!imageUrl) {
+      //   console.log("imageUrl vojoud nadasht =>", secondTag);
+      //   const target2 = $(secondTag);
+      //   console.log("now: ", target2);
+      //   let rawimageUrl = target2.src() || '';
+      //   console.log("now: ", rawimageUrl);
+        
+      //   imgTargetUrl = toAbsoluteUrl(rawimageUrl, siteAddress);
+      //   console.log("now: ", imgTargetUrl);
+      // }
+
     } else {
       contentHtml = $('body').html() || '';
       contentText = $('body').text() || '';
+      imageUrl
       console.log('No taggggggg:', contentHtml);
     }
 
 
     
       
-    console.log('main content===========================');
+    // console.log('main content===========================');
 
     return {
       contentHtml: contentHtml.trim(),
       contentText: contentText.trim(),
+      imageUrl
     };
   } catch (error) {
     console.error(`❌ Error fetching article ${url}:`, error.message);
