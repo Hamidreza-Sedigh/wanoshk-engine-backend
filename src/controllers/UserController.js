@@ -6,7 +6,7 @@ module.exports = {
     async createUser(req, res){
         try {
             console.log(req.body);
-            const {firstName, lastName, password, email} = req.body;
+            const {firstName, lastName, password, email, username} = req.body;
 
             const existenUser = await User.findOne({email});
 
@@ -16,7 +16,8 @@ module.exports = {
                     firstName,
                     lastName,
                     password: hashedPassword,
-                    email
+                    email,
+                    username
                 });
 
                 return jwt.sign({user: userResponse}, 'secret', (err, token)=>{
