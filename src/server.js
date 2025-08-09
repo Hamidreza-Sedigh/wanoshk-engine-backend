@@ -17,11 +17,15 @@ const io = socketio(server);
 
 const EngineStatus = require('./models/EngineStatus');
 
-console.log("test1");
+console.log("test-start-engine-server.js");
+console.log("ENV:", config.env);
+console.log("DB:", config.db.uri);
+console.log("PORT:", config.app.port);
 
-if(process.env.NODE_ENV !== 'production' ){
-    require('dotenv').config()
-}
+
+// if(process.env.NODE_ENV !== 'production' ){
+//     require('dotenv').config()
+// }
 
 try {
     //mongoose.connect(process.env.MONGO_DB_CONNECTION, { // with atlas
