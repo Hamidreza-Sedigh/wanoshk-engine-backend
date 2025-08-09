@@ -8,9 +8,9 @@ const socketio = require('socket.io');
 const bodyParser = require('body-parser');
 const engine =   require('./core/engine');
 const engineTest =   require('./core/engine-test');
-const Port = process.env.PORT || 8080
-
-
+const config = require('../config');
+const Port = config.app.port;
+//const Port = process.env.PORT || 8080
 const app =      express();
 const server = http.Server(app);
 const io = socketio(server); 
@@ -25,7 +25,8 @@ if(process.env.NODE_ENV !== 'production' ){
 
 try {
     //mongoose.connect(process.env.MONGO_DB_CONNECTION, { // with atlas
-    mongoose.connect("mongodb://localhost:27017/kahrobaDB", {
+    //mongoose.connect("mongodb://localhost:27017/kahrobaDB", {
+  mongoose.connect(config.db.uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     })
