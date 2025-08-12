@@ -22,7 +22,7 @@ const config = {
   },
 
   db: {
-    uri: dbUri
+    uri: dbUri + '?authSource=admin'
   },
 
   log: {
