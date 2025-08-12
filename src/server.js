@@ -6,9 +6,9 @@ const path =     require('path');
 const http =     require('http');
 const socketio = require('socket.io');
 const bodyParser = require('body-parser');
-const engine =   require('./core/engine');
+const engine =     require('./core/engine');
 const engineTest =   require('./core/engine-test');
-const config = require('../config');
+const config =       require('../config');
 const Port = config.app.port;
 //const Port = process.env.PORT || 8080
 const app =      express();
@@ -27,9 +27,9 @@ console.log("PORT:", config.app.port);
 //     require('dotenv').config()
 // }
 
+//mongoose.connect(process.env.MONGO_DB_CONNECTION, { // with atlas
+//mongoose.connect("mongodb://localhost:27017/kahrobaDB", {
 try {
-    //mongoose.connect(process.env.MONGO_DB_CONNECTION, { // with atlas
-    //mongoose.connect("mongodb://localhost:27017/kahrobaDB", {
   mongoose.connect(config.db.uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true

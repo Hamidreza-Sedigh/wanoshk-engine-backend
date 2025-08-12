@@ -18,7 +18,7 @@ const routes = express.Router();
 const upload = multer(uploadConfig);
 
 
-//routes.get('/status', (req, res)=>{  res.send({ status : 200}) }); // jean
+routes.get('/appStatus', (req, res)=>{  res.send({ status : 200}) }); // jean
 routes.get('/status', EngineController.getStatus);
 routes.post('/status', EngineController.updateStatus);
 

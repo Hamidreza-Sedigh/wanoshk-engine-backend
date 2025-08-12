@@ -3,6 +3,16 @@ require('dotenv-flow').config(); // فقط یک بار لود بشه
 
 const ENV = process.env.NODE_ENV || 'development';
 
+let dbUri;
+
+if (process.env.DB_USER) {
+  const user = process.env.DB_USER;
+  const pass = encodeURIComponent(process.env.DB_PASS || '');
+  dbUri = `mongodb://${user}:${pass}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
+} else {
+  dbUri = `mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`;
+}
+
 const config = {
   env: ENV,
 
@@ -12,15 +22,11 @@ const config = {
   },
 
   db: {
-    uri: process.env.DB_URI
+    uri: dbUri
   },
 
   log: {
     level: process.env.LOG_LEVEL || 'info'
-  },
-
-  features: {
-    enableCoolFeature: process.env.ENABLE_COOL_FEATURE === 'true'
   }
 };
 
