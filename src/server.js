@@ -48,22 +48,22 @@ app.use(bodyParser.urlencoded({     // to support  URL-encoded bodies
   extended: true
 }));
 
-// io.on('connection', socket => {
-//     console.log(socket.handshake.query)
-//     const { user } = socket.handshake.query;
+io.on('connection', socket => {
+    console.log(socket.handshake.query)
+    const { user } = socket.handshake.query;
 
-//     connectUsers[user] = socket.id;
+    connectUsers[user] = socket.id;
     
-//     //console.log('user is connected.', socket.id)
-//     //io.emit('hamid', {data: "hello-world"})
-// });
+    //console.log('user is connected.', socket.id)
+    //io.emit('hamid', {data: "hello-world"})
+});
 
-// //app.use();
-// app.use((req, res, next)=> {
-//     req.io = io;
-//     req.connectUsers = connectUsers;
-//     return next();
-// });
+//app.use();
+app.use((req, res, next)=> {
+    req.io = io;
+    req.connectUsers = connectUsers;
+    return next();
+});
 app.use(cors());
 app.use(express.json());
 app.use("/files", express.static(path.resolve(__dirname, "..", "files")));
