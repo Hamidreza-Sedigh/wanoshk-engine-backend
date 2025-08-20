@@ -8,7 +8,7 @@ module.exports = {
 
         try {
             const {email, password} = req.body
-            console.log("routes OK!", email, password)
+            console.log("Login Controller")
             if (!email || !password){
                 return res.status(200).json({message: "Rquired field missing"});
             }
