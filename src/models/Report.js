@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const ReportSchema = new mongoose.Schema({
   newsId: {
-    type: mongoose.Schema.Types.ObjectId,
+    // type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'News',
   },
